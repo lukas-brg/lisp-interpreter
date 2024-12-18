@@ -1,7 +1,7 @@
 
 use crate::token::{Token, TokenContent};
 use crate::token::TokenContext;
-use crate::token::TokenType::NUMBER;
+use crate::token::TokenType::{LPAREN, NUMBER, PLUS, RPAREN};
 
 fn parse_number(input: &str, start: usize) -> (usize, TokenContent) {
 
@@ -59,6 +59,18 @@ pub fn tokenize_line(input: &str, tokens: &mut Vec<Token>, line_num: usize) {
                 // Skip whitespace (space, newline, tab)
                 index += 1; // Move to the next character
                 continue; // Continue to the next iteration of the loop
+            },
+            '(' => {
+                let t = Token::new(LPAREN, context, None);
+                tokens.push(t);
+            },
+            ')' => {
+                let t = Token::new(RPAREN, context, None);
+                tokens.push(t);
+            },
+            '+' => {
+                let t = Token::new(PLUS, context, None);
+                tokens.push(t);
             },
 
             _ => {}
