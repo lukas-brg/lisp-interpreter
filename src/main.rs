@@ -8,5 +8,5 @@ mod parse;
 
 fn main() {
     println!("Lisp interpreter");
-    eval("(+ 1 2)")
+    eval("(+ 1 (* 2 3))");
 }

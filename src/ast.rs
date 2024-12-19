@@ -41,8 +41,8 @@ pub struct AstTree {
 impl AstNode {
     pub fn new(node_type: AstNodeType, node_value: Option<AstNodeValue>) -> AstNode {
         return AstNode {
-            node_type: node_type,
-            node_value: node_value,
+            node_type,
+            node_value,
             children: Vec::new(),
         }
     }
@@ -57,7 +57,7 @@ impl AstTree {
         );
 
         return AstTree {
-            root: root
+            root,
         }
     }
 
