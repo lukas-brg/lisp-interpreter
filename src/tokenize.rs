@@ -54,7 +54,7 @@ pub fn tokenize_line(input: &str, tokens: &mut Vec<Token>, line_num: usize) {
         }
 
 
-        let token = match c {
+        match c {
             ' ' | '\n' | '\t' => {
                 // Skip whitespace (space, newline, tab)
                 index += 1; // Move to the next character

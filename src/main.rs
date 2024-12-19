@@ -1,9 +1,10 @@
-use crate::tokenize::tokenize;
+use crate::eval::eval;
 
 mod token;
 mod tokenize;
+mod eval;
 
 fn main() {
     println!("Lisp interpreter");
-    tokenize("(+ 1 2)");
+    eval("(+ 1 2)")
 }
