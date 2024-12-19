@@ -1,6 +1,8 @@
 
 use crate::tokenize::tokenize;
+use crate::parse::parse;
 
 pub fn eval(input: &str) {
-    tokenize(input);
+    let tokens = tokenize(input);
+    parse(tokens);
 }
