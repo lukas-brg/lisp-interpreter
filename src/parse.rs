@@ -51,7 +51,7 @@ fn number(parent: &mut AstNode, token: &Token) {
         TokenContent::Int(v) => {
             ast_value = AstNodeValue::Int(v);
         }
-        _ => {unreachable!()}
+        _ => unreachable!()
 
     };
 
@@ -70,7 +70,7 @@ fn _parse(parser: &mut ParserState, parent: &mut AstNode) {
     while let Some(token) = parser.advance() {
         match token.token_type {
             RPAREN => {
-                return
+                return;
             },
             LPAREN => {
                 subtree(parser, parent);
@@ -84,13 +84,14 @@ fn _parse(parser: &mut ParserState, parent: &mut AstNode) {
     }
 }
 
-pub fn parse(tokens: Vec<Token>) {
+pub fn parse(tokens: Vec<Token>) -> Box<AstNode> {
 
     let mut parser = ParserState::new(tokens);
     let mut root = AstNode::new(AstNodeType::ROOT, None);
 
     _parse(&mut parser, &mut root);
-    print!("\n\n{}", root);
+    let tree = AstTree::new();
+    return  Box::new(root);
 }
 
 

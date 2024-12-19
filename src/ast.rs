@@ -59,6 +59,9 @@ impl AstNode {
         self.children.push(node);
     }
 
+    pub fn children(&self) -> &Vec<Box<AstNode>> {
+        return &self.children;
+    }
     
 }
 
@@ -74,6 +77,7 @@ impl AstTree {
             root,
         }
     }
+
 
 
 }
