@@ -26,16 +26,16 @@ pub struct Token {
 #[derive(Debug, Clone)]
 pub enum TokenContent {
     Float(f64),
-    Int(i32),
+    Int(i64),
     String(String),
 }
 
 impl Token {
     pub fn new(token_type: TokenType, context: TokenContext, content: Option<TokenContent>) -> Self {
-        Token {
+        return Token {
             token_type,
             context,
             content,
-        }
+        };
     }
 }

@@ -1,5 +1,5 @@
 
-use crate::token::{Token, TokenContent};
+use crate::token::{Token, TokenContent, TokenType};
 use crate::token::TokenContext;
 use crate::token::TokenType::{LPAREN, NUMBER, PLUS, RPAREN};
 
@@ -27,8 +27,7 @@ fn parse_number(input: &str, start: usize) -> (usize, TokenContent) {
         let parsed_float: f64 = num_str.trim().parse().expect("Failed to parse float");
         content = TokenContent::Float(parsed_float);
     } else {
-        println!(" {}", num_str);
-        let parsed_int: i32 = num_str.trim().parse::<i32>().unwrap();
+        let parsed_int: i64 = num_str.trim().parse::<i64>().unwrap();
         content = TokenContent::Int(parsed_int);
     }
 
@@ -67,6 +66,10 @@ pub fn tokenize_line(input: &str, tokens: &mut Vec<Token>, line_num: usize) {
                 let t = Token::new(PLUS, context, None);
                 tokens.push(t);
             },
+            '*' => {
+                let t = Token::new(TokenType::MULT, context, None);
+                tokens.push(t);
+            },
 
             _ => {}
         };
@@ -79,12 +82,9 @@ pub fn tokenize(input: &str) -> Vec<Token> {
     let mut tokens: Vec<Token> = Vec::new();
 
     for (line_number, line) in input.lines().enumerate() {
-
-        println!("Line {}: {}", line_number + 1, line);
         tokenize_line(line, &mut tokens, line_number)
     }
 
-    println!("Tokens: {:?}", tokens);
     return tokens;
 
 }
