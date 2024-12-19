@@ -44,7 +44,7 @@ pub fn tokenize_line(input: &str, tokens: &mut Vec<Token>, line_num: usize) {
             column_number: index,
         };
 
-        let c = input.as_bytes()[index] as char; // Get the character at the current index
+        let c = input.as_bytes()[index] as char;
 
         if c.is_numeric() {
             let (i, content) = parse_number(input, index);
@@ -55,11 +55,6 @@ pub fn tokenize_line(input: &str, tokens: &mut Vec<Token>, line_num: usize) {
 
 
         match c {
-            ' ' | '\n' | '\t' => {
-                // Skip whitespace (space, newline, tab)
-                index += 1; // Move to the next character
-                continue; // Continue to the next iteration of the loop
-            },
             '(' => {
                 let t = Token::new(LPAREN, context, None);
                 tokens.push(t);
