@@ -1,7 +1,9 @@
-use crate::ast::{AstNode, AstNodeType, AstNodeValue, AstTree, Operator};
+use crate::ast::{AstNode, AstNodeType, AstNodeValue, AstTree};
 use crate::token::{Token, TokenContent, TokenType};
 use crate::token::TokenContext;
-use crate::token::TokenType::{LPAREN, NUMBER, PLUS, RPAREN};
+use crate::token::TokenType::{LPAREN, NUMBER, OPERATOR, RPAREN};
+use crate::operatortype::Operator;
+use crate::operatortype::Operator::{MUL, DIV, MINUS, PLUS};
 
 struct ParserState {
     tokens: Vec<Token>,
@@ -12,29 +14,19 @@ struct ParserState {
 
 fn subtree(parser: &mut ParserState, parent: &mut AstNode) {
     if let Some(operator_token) = parser.advance() {
-        match operator_token.token_type {
-            PLUS | TokenType::MINUS | TokenType::DIV | TokenType::MULT => {
-                
-                let mut operator_node = AstNode::new(
-                    AstNodeType::OPERATOR,
-                    Some(AstNodeValue::Operator(
-                        match operator_token.token_type {
-                            TokenType::PLUS => Operator::PLUS,
-                            TokenType::MINUS => Operator::MINUS,
-                            TokenType::MULT => Operator::MUL,
-                            TokenType::DIV => Operator::DIV,
-                            _ => unreachable!(), 
-                        }
-                    )),
-                );
+        if let Some(TokenContent::Operator(operator)) = operator_token.content.clone() {
 
-                _parse(parser, &mut operator_node);
-                parent.add_child(Box::new(operator_node));
-            },
-            _ => {
-                panic!("Expected an operator after '(', found {:?}", operator_token.token_type);
-            },
-        };
+            let mut operator_node = AstNode::new(
+                AstNodeType::OPERATOR,
+                Some(AstNodeValue::Operator(operator)
+            ));
+            
+            _parse(parser, &mut operator_node);
+            parent.add_child(Box::new(operator_node));
+        } else {
+            panic!("Expected an operator after '(', found {:?}", operator_token.token_type);
+        }
+        
     } else {
         panic!("Unexpected end of input after '('");
     }

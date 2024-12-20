@@ -1,11 +1,11 @@
+use crate::operatortype::Operator;
+
+
 #[derive(Debug, Clone, Copy)]
 pub enum TokenType {
     LPAREN,
     RPAREN,
-    PLUS,
-    MINUS,
-    MULT,
-    DIV,
+    OPERATOR,
     NUMBER,
     IDENTIFIER,
 }
@@ -28,6 +28,7 @@ pub enum TokenContent {
     Float(f64),
     Int(i64),
     String(String),
+    Operator(Operator),
 }
 
 impl Token {

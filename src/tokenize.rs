@@ -1,7 +1,10 @@
 
 use crate::token::{Token, TokenContent, TokenType};
 use crate::token::TokenContext;
-use crate::token::TokenType::{LPAREN, NUMBER, PLUS, RPAREN};
+use crate::token::TokenType::{LPAREN, NUMBER, OPERATOR, RPAREN};
+use crate::operatortype::Operator::{MUL, DIV, MINUS, PLUS};
+
+
 
 fn parse_number(input: &str, start: usize) -> (usize, TokenContent) {
 
@@ -63,11 +66,13 @@ pub fn tokenize_line(input: &str, tokens: &mut Vec<Token>, line_num: usize) {
                 tokens.push(t);
             },
             '+' => {
-                let t = Token::new(PLUS, context, None);
+                
+                
+                let t = Token::new(TokenType::OPERATOR, context, Some(TokenContent::Operator(PLUS)));
                 tokens.push(t);
             },
             '*' => {
-                let t = Token::new(TokenType::MULT, context, None);
+                let t = Token::new(TokenType::OPERATOR, context, Some(TokenContent::Operator(MUL)));
                 tokens.push(t);
             },
 
