@@ -8,6 +8,7 @@ pub enum TokenType {
     OPERATOR,
     NUMBER,
     IDENTIFIER,
+    STRING,
 }
 
 #[derive(Debug, Clone)]

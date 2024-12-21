@@ -8,34 +8,37 @@ use crate::operatortype::Operator::{MUL, DIV, MINUS, PLUS};
 
 fn parse_number(input: &str, start: usize) -> (usize, TokenContent) {
 
-    let mut index = start + 1;
-
-    let mut num_str = String::new();
-
-    let mut c = input.as_bytes()[start] as char;
-    num_str.push(c);
+    let mut chars = input[start..].chars();
     let mut float = false;
-    c = input.as_bytes()[index] as char;
-    while index < input.len() && (c.is_numeric() || c == '.') {
-        c = input.as_bytes()[index] as char;
+    let mut end = start;
+    
+    for (i, c) in chars.enumerate() {
+        if !c.is_numeric() && c != '.' {
+            break;
+        }
         if c == '.'{
+            if float {
+                panic!("Invalid number: multiple decimal points found");
+            }
             float = true;
         }
-        num_str.push(c);
-        index += 1;
+        end += 1;
     }
-    let content;
 
+    let num_str = &input[start..end];
+       
+    let content;
     if float {
-        let parsed_float: f64 = num_str.trim().parse().expect("Failed to parse float");
+        let parsed_float: f64 = num_str.parse().expect("Failed to parse float");
         content = TokenContent::Float(parsed_float);
     } else {
-        let parsed_int: i64 = num_str.trim().parse::<i64>().unwrap();
+        let parsed_int: i64 = num_str.parse::<i64>().unwrap();
         content = TokenContent::Int(parsed_int);
     }
 
-    return (index, content);
+    return (end, content);
 }
+
 
 pub fn tokenize_line(input: &str, tokens: &mut Vec<Token>, line_num: usize) {
     let mut index = 0;
@@ -66,8 +69,6 @@ pub fn tokenize_line(input: &str, tokens: &mut Vec<Token>, line_num: usize) {
                 tokens.push(t);
             },
             '+' => {
-                
-                
                 let t = Token::new(TokenType::OPERATOR, context, Some(TokenContent::Operator(PLUS)));
                 tokens.push(t);
             },
@@ -75,6 +76,10 @@ pub fn tokenize_line(input: &str, tokens: &mut Vec<Token>, line_num: usize) {
                 let t = Token::new(TokenType::OPERATOR, context, Some(TokenContent::Operator(MUL)));
                 tokens.push(t);
             },
+            
+            '"' => {
+
+            }
 
             _ => {}
         };

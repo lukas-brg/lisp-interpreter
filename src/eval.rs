@@ -15,5 +15,4 @@ pub fn eval(input: &str) {
     let root = parse(tokens);
     print!("\nParse result:\n{}", root);
     eval_tree(root);
-
 }

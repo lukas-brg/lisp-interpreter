@@ -13,18 +13,18 @@ struct ParserState {
 
 
 fn subtree(parser: &mut ParserState, parent: &mut AstNode) {
-    if let Some(operator_token) = parser.advance() {
-        if let Some(TokenContent::Operator(operator)) = operator_token.content.clone() {
+    if let Some(token) = parser.advance() {
+        if let Some(TokenContent::Operator(operator)) = token.content.clone() {
 
             let mut operator_node = AstNode::new(
                 AstNodeType::OPERATOR,
-                Some(AstNodeValue::Operator(operator)
-            ));
+                Some(AstNodeValue::Operator(operator))
+            );
             
             _parse(parser, &mut operator_node);
             parent.add_child(Box::new(operator_node));
         } else {
-            panic!("Expected an operator after '(', found {:?}", operator_token.token_type);
+            panic!("Expected an operator after '(', found {:?}", token.token_type);
         }
         
     } else {
@@ -33,24 +33,19 @@ fn subtree(parser: &mut ParserState, parent: &mut AstNode) {
 }
 
 
-fn number(parent: &mut AstNode, token: &Token) {
+fn number(token: &Token, parent: &mut AstNode) {
     let content = token.content.clone().unwrap();
-    let ast_value;
-    match content {
-        TokenContent::Float(v) => {
-            ast_value = AstNodeValue::Float(v);
-        },
-        TokenContent::Int(v) => {
-            ast_value = AstNodeValue::Int(v);
-        }
+    
+    let ast_value  = match content {
+        TokenContent::Float(v) => AstNodeValue::Float(v),
+        TokenContent::Int(v) =>  AstNodeValue::Int(v),
         _ => unreachable!()
-
     };
 
     let node =
         AstNode::new(
         AstNodeType::LITERAL, 
-        Some(ast_value)
+        Some(ast_value),
         
     );
     parent.add_child(Box::new(node));
@@ -61,16 +56,9 @@ fn _parse(parser: &mut ParserState, parent: &mut AstNode) {
     
     while let Some(token) = parser.advance() {
         match token.token_type {
-            RPAREN => {
-                return;
-            },
-            LPAREN => {
-                subtree(parser, parent);
-            },
-            NUMBER => {
-                number(parent, token);
-            },
-          
+            RPAREN => return,
+            LPAREN => subtree(parser, parent),
+            NUMBER => number(token, parent),
             _ => {}
         };
     }
@@ -83,7 +71,7 @@ pub fn parse(tokens: Vec<Token>) -> Box<AstNode> {
 
     _parse(&mut parser, &mut root);
     let tree = AstTree::new();
-    return  Box::new(root);
+    return Box::new(root);
 }
 
 
