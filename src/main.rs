@@ -7,6 +7,7 @@ mod ast;
 mod parse;
 mod env;
 mod operatortype;
+mod errors;
 
 fn main() {
     eval("(+ 1 (* 2 3))");

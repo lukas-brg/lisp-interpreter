@@ -3,10 +3,11 @@ use crate::token::{Token, TokenContent, TokenType};
 use crate::token::TokenContext;
 use crate::token::TokenType::{LPAREN, NUMBER, OPERATOR, RPAREN};
 use crate::operatortype::Operator::{MUL, DIV, MINUS, PLUS};
+use crate::errors::TokenizerError;
 
 
 
-fn parse_number(input: &str, start: usize) -> (usize, TokenContent) {
+fn parse_number(input: &str, start: usize, context: &TokenContext) -> Result<(usize, TokenContent), TokenizerError> {
 
     let mut chars = input[start..].chars();
     let mut float = false;
@@ -16,9 +17,16 @@ fn parse_number(input: &str, start: usize) -> (usize, TokenContent) {
         if !c.is_numeric() && c != '.' {
             break;
         }
-        if c == '.'{
+        if c == '.' {
             if float {
-                panic!("Invalid number: multiple decimal points found");
+                return Err(
+                    TokenizerError::new(
+                        context.line_number, 
+                        start, 
+                        i, 
+                        "Invalid number: multiple decimal points found"
+                    )
+                );
             }
             float = true;
         }
@@ -36,29 +44,42 @@ fn parse_number(input: &str, start: usize) -> (usize, TokenContent) {
         content = TokenContent::Int(parsed_int);
     }
 
-    return (end, content);
+    return Ok((end, content));
 }
 
 
-pub fn tokenize_line(input: &str, tokens: &mut Vec<Token>, line_num: usize) {
+
+pub fn tokenize_line(input: &str, tokens: &mut Vec<Token>, line_num: usize) -> Result<(), TokenizerError> {
     let mut index = 0;
     while index < input.len() {
+
+        let c = input.as_bytes()[index] as char;
+        
+        if c.is_whitespace() {
+            index += 1;
+            continue;
+        }
 
         let context = TokenContext{
             line_number: line_num,
             column_number: index,
         };
 
-        let c = input.as_bytes()[index] as char;
 
         if c.is_numeric() {
-            let (i, content) = parse_number(input, index);
-            index = i;
-            tokens.push(Token::new(NUMBER, context, Some(content)));
-            continue;
+            
+            match parse_number(input, index, &context) {
+                Ok((i, content)) => {
+                    index = i;
+                    tokens.push(Token::new(NUMBER, context, Some(content)));
+                    continue;
+                },
+                Err(e) => {
+                    return Err(e);
+                }
+            }
         }
-
-
+        
         match c {
             '(' => {
                 let t = Token::new(LPAREN, context, None);
@@ -78,23 +99,37 @@ pub fn tokenize_line(input: &str, tokens: &mut Vec<Token>, line_num: usize) {
             },
             
             '"' => {
-
+                
             }
-
-            _ => {}
+            
+            _ => {
+                return Err(
+                    TokenizerError::new(
+                        line_num, 
+                        index, 
+                        index, 
+                        std::format!("Unrecognized Token '{}'", c).as_str()
+                    )
+                );
+            }
         };
-
         index += 1;
     }
+    return Ok(());
 }
 
-pub fn tokenize(input: &str) -> Vec<Token> {
+pub fn tokenize(input: &str) -> Result<Vec<Token>, TokenizerError> {
     let mut tokens: Vec<Token> = Vec::new();
 
     for (line_number, line) in input.lines().enumerate() {
-        tokenize_line(line, &mut tokens, line_number)
+        match tokenize_line(line, &mut tokens, line_number) {
+            Ok(()) => {},
+            Err(e) => {
+                return Err(e);
+            }
+        }
     }
 
-    return tokens;
+    return Ok(tokens);
 
 }
