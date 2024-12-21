@@ -10,7 +10,7 @@ use crate::errors::TokenizerError;
 
 
 
-fn parse_number<I>(input: I, first_char: char, context: &TokenContext) -> Result<(usize, TokenContent), TokenizerError> 
+fn parse_number<I>(input: I, first_char: char, context: &TokenContext) -> Result<TokenContent, TokenizerError> 
 where I: IntoIterator<Item = (usize, char)>
 {
     let mut float = false;
@@ -46,7 +46,7 @@ where I: IntoIterator<Item = (usize, char)>
         content = TokenContent::Int(parsed_int);
     }
 
-    return Ok((0, content));
+    return Ok(content);
 }
 
 
@@ -68,16 +68,9 @@ pub fn tokenize_line(input_str: &str, tokens: &mut Vec<Token>, line_num: usize) 
 
 
         if c.is_numeric() {
-            
-            match parse_number(input.by_ref(), c, &context) {
-                Ok((i, content)) => {
-                    tokens.push(Token::new(NUMBER, context, Some(content)));
-                    continue;
-                },
-                Err(e) => {
-                    return Err(e);
-                }
-            }
+            let content = parse_number(input.by_ref(), c, &context)?;
+            tokens.push(Token::new(NUMBER, context, Some(content)));
+            continue;
         }
         
         match c {
@@ -97,11 +90,9 @@ pub fn tokenize_line(input_str: &str, tokens: &mut Vec<Token>, line_num: usize) 
                 let t = Token::new(TokenType::OPERATOR, context, Some(TokenContent::Operator(MUL)));
                 tokens.push(t);
             },
-            
             '"' => {
                 
             }
-            
             _ => {
                 return Err(
                     TokenizerError::new(
@@ -121,12 +112,7 @@ pub fn tokenize(input: &str) -> Result<Vec<Token>, TokenizerError> {
     let mut tokens: Vec<Token> = Vec::new();
 
     for (line_number, line) in input.lines().enumerate() {
-        match tokenize_line(line, &mut tokens, line_number) {
-            Ok(()) => {},
-            Err(e) => {
-                return Err(e);
-            }
-        }
+        tokenize_line(line, &mut tokens, line_number)?
     }
 
     return Ok(tokens);
