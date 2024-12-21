@@ -1,4 +1,7 @@
 
+use core::num;
+use std::str::CharIndices;
+
 use crate::token::{Token, TokenContent, TokenType};
 use crate::token::TokenContext;
 use crate::token::TokenType::{LPAREN, NUMBER, OPERATOR, RPAREN};
@@ -7,13 +10,13 @@ use crate::errors::TokenizerError;
 
 
 
-fn parse_number(input: &str, start: usize, context: &TokenContext) -> Result<(usize, TokenContent), TokenizerError> {
-
-    let mut chars = input[start..].chars();
+fn parse_number<I>(input: I, first_char: char, context: &TokenContext) -> Result<(usize, TokenContent), TokenizerError> 
+where I: IntoIterator<Item = (usize, char)>
+{
     let mut float = false;
-    let mut end = start;
-    
-    for (i, c) in chars.enumerate() {
+    let mut num_str = String::from(first_char);
+
+    for (i, c) in input {
         if !c.is_numeric() && c != '.' {
             break;
         }
@@ -22,7 +25,7 @@ fn parse_number(input: &str, start: usize, context: &TokenContext) -> Result<(us
                 return Err(
                     TokenizerError::new(
                         context.line_number, 
-                        start, 
+                        context.column_number, 
                         i, 
                         "Invalid number: multiple decimal points found"
                     )
@@ -30,11 +33,10 @@ fn parse_number(input: &str, start: usize, context: &TokenContext) -> Result<(us
             }
             float = true;
         }
-        end += 1;
+        num_str.push(c);
+  
     }
 
-    let num_str = &input[start..end];
-       
     let content;
     if float {
         let parsed_float: f64 = num_str.parse().expect("Failed to parse float");
@@ -44,19 +46,18 @@ fn parse_number(input: &str, start: usize, context: &TokenContext) -> Result<(us
         content = TokenContent::Int(parsed_int);
     }
 
-    return Ok((end, content));
+    return Ok((0, content));
 }
 
 
 
-pub fn tokenize_line(input: &str, tokens: &mut Vec<Token>, line_num: usize) -> Result<(), TokenizerError> {
-    let mut index = 0;
-    while index < input.len() {
+pub fn tokenize_line(input_str: &str, tokens: &mut Vec<Token>, line_num: usize) -> Result<(), TokenizerError> {
+    
+    let mut input = input_str.char_indices();
+    
+    while let Some((index, c)) = input.next() {
 
-        let c = input.as_bytes()[index] as char;
-        
         if c.is_whitespace() {
-            index += 1;
             continue;
         }
 
@@ -68,9 +69,8 @@ pub fn tokenize_line(input: &str, tokens: &mut Vec<Token>, line_num: usize) -> R
 
         if c.is_numeric() {
             
-            match parse_number(input, index, &context) {
+            match parse_number(input.by_ref(), c, &context) {
                 Ok((i, content)) => {
-                    index = i;
                     tokens.push(Token::new(NUMBER, context, Some(content)));
                     continue;
                 },
@@ -113,7 +113,6 @@ pub fn tokenize_line(input: &str, tokens: &mut Vec<Token>, line_num: usize) -> R
                 );
             }
         };
-        index += 1;
     }
     return Ok(());
 }
