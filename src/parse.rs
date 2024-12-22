@@ -1,4 +1,4 @@
-use crate::ast::{AstNode, AstNodeType, AstNodeValue, AstTree};
+use crate::ast::{AstNode, AstNodeType, AstNodeValue};
 use crate::errors::ParsingError;
 use crate::operatortype::Operator;
 use crate::operatortype::Operator::{Div, Minus, Mul, Plus};
@@ -6,7 +6,6 @@ use crate::token::{Token, TokenContent, TokenContext, TokenType};
 
 struct ParserState {
     tokens: Vec<Token>,
-    tree: AstTree,
     current_token_idx: usize,
 }
 
@@ -18,7 +17,7 @@ fn subtree(parser: &mut ParserState, parent: &mut AstNode) -> Result<(), Parsing
                 Some(AstNodeValue::Operator(operator)),
             );
             _parse(parser, &mut operator_node)?;
-            parent.add_child(Box::new(operator_node));
+            parent.add_child(operator_node);
         } else {
             let err = ParsingError::new(
                 Some(token.clone()),
@@ -48,7 +47,7 @@ fn number(token: &Token, parent: &mut AstNode) {
     };
 
     let node = AstNode::new(AstNodeType::Literal, Some(ast_value));
-    parent.add_child(Box::new(node));
+    parent.add_child(node);
 }
 
 fn _parse(parser: &mut ParserState, parent: &mut AstNode) -> Result<(), ParsingError> {
@@ -64,20 +63,18 @@ fn _parse(parser: &mut ParserState, parent: &mut AstNode) -> Result<(), ParsingE
     Ok(())
 }
 
-pub fn parse(tokens: Vec<Token>) -> Result<Box<AstNode>, ParsingError> {
+pub fn parse(tokens: Vec<Token>) -> Result<AstNode, ParsingError> {
     let mut parser = ParserState::new(tokens);
     let mut root = AstNode::new(AstNodeType::Root, None);
 
     _parse(&mut parser, &mut root)?;
-    let tree = AstTree::new();
-    Ok(Box::new(root))
+    Ok(root)
 }
 
 impl ParserState {
     pub fn new(tokens: Vec<Token>) -> ParserState {
         ParserState {
             tokens,
-            tree: AstTree::new(),
             current_token_idx: 0,
         }
     }

@@ -3,7 +3,7 @@ use crate::ast::AstNode;
 use crate::parse::parse;
 use crate::tokenize::tokenize;
 
-fn eval_tree(node: Box<AstNode>) {
+fn eval_tree(node: AstNode) {
     match node.node_type {
         ast::AstNodeType::Operator => {
             let mut res = 0;

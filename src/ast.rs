@@ -21,12 +21,7 @@ pub enum AstNodeType {
 pub struct AstNode {
     pub node_type: AstNodeType,
     pub node_value: Option<AstNodeValue>,
-    children: Vec<Box<AstNode>>,
-}
-
-#[derive(Debug, Clone)]
-pub struct AstTree {
-    root: AstNode,
+    children: Vec<AstNode>,
 }
 
 impl AstNode {
@@ -38,20 +33,12 @@ impl AstNode {
         }
     }
 
-    pub fn add_child(&mut self, node: Box<AstNode>) {
+    pub fn add_child(&mut self, node: AstNode) {
         self.children.push(node);
     }
 
-    pub fn children(&self) -> &Vec<Box<AstNode>> {
+    pub fn children(&self) -> &Vec<AstNode> {
         &self.children
-    }
-}
-
-impl AstTree {
-    pub fn new() -> AstTree {
-        let root = AstNode::new(AstNodeType::Root, None);
-
-        AstTree { root }
     }
 }
 
