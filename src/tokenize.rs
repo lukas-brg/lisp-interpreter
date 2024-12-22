@@ -1,10 +1,9 @@
-use core::num;
 use std::str::CharIndices;
 
 use crate::errors::TokenizingError;
 use crate::operatortype::Operator::{Div, Minus, Mul, Plus};
 use crate::token::TokenContext;
-use crate::token::TokenType::{LparenToken, NumberToken, OperatorToken, RparenToken};
+use crate::token::TokenType::{Lparen, Number, Operator, Rparen};
 use crate::token::{Token, TokenContent, TokenType};
 
 fn parse_number<I>(
@@ -36,14 +35,13 @@ where
         num_str.push(c);
     }
 
-    let content;
-    if float {
+    let content = if float {
         let parsed_float: f64 = num_str.parse().expect("Failed to parse float");
-        content = TokenContent::Float(parsed_float);
+        TokenContent::Float(parsed_float)
     } else {
         let parsed_int: i64 = num_str.parse::<i64>().unwrap();
-        content = TokenContent::Int(parsed_int);
-    }
+        TokenContent::Int(parsed_int)
+    };
 
     Ok(content)
 }
@@ -93,26 +91,26 @@ pub fn tokenize_line(
         };
         if c.is_numeric() {
             let content = parse_number(input.by_ref(), c, &context)?;
-            tokens.push(Token::new(NumberToken, context, Some(content)));
+            tokens.push(Token::new(Number, context, Some(content)));
             continue;
         }
 
         let token = match c {
-            '(' => Token::new(LparenToken, context, None),
-            ')' => Token::new(RparenToken, context, None),
+            '(' => Token::new(Lparen, context, None),
+            ')' => Token::new(Rparen, context, None),
             '+' => Token::new(
-                TokenType::OperatorToken,
+                TokenType::Operator,
                 context,
                 Some(TokenContent::Operator(Plus)),
             ),
             '*' => Token::new(
-                TokenType::OperatorToken,
+                TokenType::Operator,
                 context,
                 Some(TokenContent::Operator(Mul)),
             ),
             '"' => {
                 let content = Some(parse_string(input.by_ref(), &context)?);
-                Token::new(TokenType::OperatorToken, context, content)
+                Token::new(TokenType::Operator, context, content)
             }
             _ => {
                 return Err(TokenizingError::new(

@@ -4,19 +4,14 @@ use crate::parse::parse;
 use crate::tokenize::tokenize;
 
 fn eval_tree(node: Box<AstNode>) {
-    
     match node.node_type {
-        ast::AstNodeType::OperatorNode => {
+        ast::AstNodeType::Operator => {
             let mut res = 0;
-            
-        },
-        
-        ast::AstNodeType::LiteralNode => {
-            
         }
-        _ => {},
+
+        ast::AstNodeType::Literal => {}
+        _ => {}
     }
-    
 }
 
 pub fn eval(input: &str) {

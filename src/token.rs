@@ -2,12 +2,12 @@ use crate::operatortype::Operator;
 
 #[derive(Debug, Clone, Copy)]
 pub enum TokenType {
-    LparenToken,
-    RparenToken,
-    OperatorToken,
-    NumberToken,
-    IdentifierToken,
-    StringToken,
+    Lparen,
+    Rparen,
+    Operator,
+    Number,
+    Identifier,
+    String,
 }
 
 #[derive(Debug, Clone)]

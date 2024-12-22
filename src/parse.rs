@@ -2,9 +2,7 @@ use crate::ast::{AstNode, AstNodeType, AstNodeValue, AstTree};
 use crate::errors::ParsingError;
 use crate::operatortype::Operator;
 use crate::operatortype::Operator::{Div, Minus, Mul, Plus};
-use crate::token::TokenContext;
-use crate::token::TokenType::{LparenToken, NumberToken, OperatorToken, RparenToken};
-use crate::token::{Token, TokenContent, TokenType};
+use crate::token::{Token, TokenContent, TokenContext, TokenType};
 
 struct ParserState {
     tokens: Vec<Token>,
@@ -16,7 +14,7 @@ fn subtree(parser: &mut ParserState, parent: &mut AstNode) -> Result<(), Parsing
     if let Some(token) = parser.advance() {
         if let Some(TokenContent::Operator(operator)) = token.content.clone() {
             let mut operator_node = AstNode::new(
-                AstNodeType::OperatorNode,
+                AstNodeType::Operator,
                 Some(AstNodeValue::Operator(operator)),
             );
             _parse(parser, &mut operator_node)?;
@@ -49,16 +47,16 @@ fn number(token: &Token, parent: &mut AstNode) {
         _ => unreachable!(),
     };
 
-    let node = AstNode::new(AstNodeType::LiteralNode, Some(ast_value));
+    let node = AstNode::new(AstNodeType::Literal, Some(ast_value));
     parent.add_child(Box::new(node));
 }
 
 fn _parse(parser: &mut ParserState, parent: &mut AstNode) -> Result<(), ParsingError> {
     while let Some(token) = parser.advance() {
         match token.token_type {
-            RparenToken => return Ok(()),
-            LparenToken => subtree(parser, parent)?,
-            NumberToken => number(token, parent),
+            TokenType::Rparen => return Ok(()),
+            TokenType::Lparen => subtree(parser, parent)?,
+            TokenType::Number => number(token, parent),
             _ => {}
         };
     }
@@ -68,7 +66,7 @@ fn _parse(parser: &mut ParserState, parent: &mut AstNode) -> Result<(), ParsingE
 
 pub fn parse(tokens: Vec<Token>) -> Result<Box<AstNode>, ParsingError> {
     let mut parser = ParserState::new(tokens);
-    let mut root = AstNode::new(AstNodeType::RootNode, None);
+    let mut root = AstNode::new(AstNodeType::Root, None);
 
     _parse(&mut parser, &mut root)?;
     let tree = AstTree::new();

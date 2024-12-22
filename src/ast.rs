@@ -11,10 +11,10 @@ pub enum AstNodeValue {
 
 #[derive(Debug, Clone)]
 pub enum AstNodeType {
-    OperatorNode,
-    LiteralNode,
-    IdentifierNode,
-    RootNode,
+    Operator,
+    Literal,
+    Identifier,
+    Root,
 }
 
 #[derive(Debug, Clone)]
@@ -49,7 +49,7 @@ impl AstNode {
 
 impl AstTree {
     pub fn new() -> AstTree {
-        let root = AstNode::new(AstNodeType::RootNode, None);
+        let root = AstNode::new(AstNodeType::Root, None);
 
         AstTree { root }
     }
@@ -72,7 +72,7 @@ impl AstNode {
         }
 
         if !self.children.is_empty() {
-            write!(f, "Children:\n")?;
+            writeln!(f, "Children:")?;
             for child in &self.children {
                 child.fmt_with_indent(f, indent_level + 1)?;
             }
@@ -80,7 +80,7 @@ impl AstNode {
             write!(f, "No children")?;
         }
 
-        write!(f, "\n")
+        writeln!(f)
     }
 }
 
