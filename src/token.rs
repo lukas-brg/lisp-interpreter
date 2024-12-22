@@ -34,10 +34,10 @@ pub enum TokenContent {
 
 impl Token {
     pub fn new(token_type: TokenType, context: TokenContext, content: Option<TokenContent>) -> Self {
-        return Token {
+        Token {
             token_type,
             context,
             content,
-        };
+        }
     }
 }

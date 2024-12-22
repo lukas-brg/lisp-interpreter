@@ -71,7 +71,7 @@ pub fn parse(tokens: Vec<Token>) -> Box<AstNode> {
 
     _parse(&mut parser, &mut root);
     let tree = AstTree::new();
-    return Box::new(root);
+    Box::new(root)
 }
 
 
@@ -79,21 +79,20 @@ impl ParserState {
     
     pub fn new(tokens: Vec<Token>) -> ParserState {
         
-        return ParserState{
+        ParserState{
             tokens,
             tree: AstTree::new(),
             current_token_idx: 0,
-        };
+        }
     }
     
     pub fn peek(&self) -> Option<&Token> {
-        let token = self.tokens.get(self.current_token_idx+1);
-        return token;
+        self.tokens.get(self.current_token_idx+1)
     }
     
     pub fn advance(&mut self) -> Option<&Token> {
         let token = self.tokens.get(self.current_token_idx);
         self.current_token_idx = std::cmp::min(self.tokens.len(), self.current_token_idx + 1);
-        return token;
+        token
     }
 }

@@ -46,7 +46,7 @@ where I: IntoIterator<Item = (usize, char)>
         content = TokenContent::Int(parsed_int);
     }
 
-    return Ok(content);
+    Ok(content)
 }
 
 
@@ -73,26 +73,12 @@ pub fn tokenize_line(input_str: &str, tokens: &mut Vec<Token>, line_num: usize) 
             continue;
         }
         
-        match c {
-            '(' => {
-                let t = Token::new(LPAREN, context, None);
-                tokens.push(t);
-            },
-            ')' => {
-                let t = Token::new(RPAREN, context, None);
-                tokens.push(t);
-            },
-            '+' => {
-                let t = Token::new(TokenType::OPERATOR, context, Some(TokenContent::Operator(PLUS)));
-                tokens.push(t);
-            },
-            '*' => {
-                let t = Token::new(TokenType::OPERATOR, context, Some(TokenContent::Operator(MUL)));
-                tokens.push(t);
-            },
-            '"' => {
-                
-            }
+        let token = match c {
+            '(' => Token::new(LPAREN, context, None),
+            ')' => Token::new(RPAREN, context, None),
+            '+' => Token::new(TokenType::OPERATOR, context, Some(TokenContent::Operator(PLUS))),
+            '*' => Token::new(TokenType::OPERATOR, context, Some(TokenContent::Operator(MUL))),
+            '"' => Token::new(TokenType::OPERATOR, context, Some(TokenContent::Operator(MUL))),
             _ => {
                 return Err(
                     TokenizerError::new(
@@ -104,8 +90,10 @@ pub fn tokenize_line(input_str: &str, tokens: &mut Vec<Token>, line_num: usize) 
                 );
             }
         };
+        tokens.push(token);
     }
-    return Ok(());
+    
+    Ok(())
 }
 
 pub fn tokenize(input: &str) -> Result<Vec<Token>, TokenizerError> {
@@ -115,6 +103,5 @@ pub fn tokenize(input: &str) -> Result<Vec<Token>, TokenizerError> {
         tokenize_line(line, &mut tokens, line_number)?
     }
 
-    return Ok(tokens);
-
+    Ok(tokens)
 }

@@ -11,13 +11,16 @@ fn eval_tree(root: Box<AstNode>) {
 }
 
 pub fn eval(input: &str) {
+    
     match tokenize(input) {
         Ok(tokens) => {
             let root = parse(tokens);
             print!("\nParse result:\n{}", root);
             eval_tree(root);
         },
-        Err(e) => panic!("\n{}", e)
+        Err(e) => {
+            panic!("\n{}", e);
+        }
     }
     
 }
