@@ -1,9 +1,22 @@
+use crate::ast;
 use crate::ast::AstNode;
 use crate::parse::parse;
 use crate::tokenize::tokenize;
 
-fn eval_tree(root: Box<AstNode>) {
-    for node in root.children() {}
+fn eval_tree(node: Box<AstNode>) {
+    
+    match node.node_type {
+        ast::AstNodeType::OperatorNode => {
+            let mut res = 0;
+            
+        },
+        
+        ast::AstNodeType::LiteralNode => {
+            
+        }
+        _ => {},
+    }
+    
 }
 
 pub fn eval(input: &str) {

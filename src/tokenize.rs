@@ -48,6 +48,34 @@ where
     Ok(content)
 }
 
+fn parse_string<I>(input: I, context: &TokenContext) -> Result<TokenContent, TokenizingError>
+where
+    I: IntoIterator<Item = (usize, char)>,
+{
+    let mut str = String::new();
+    let mut string_closed = false;
+    let mut last_index = 0;
+    for (i, c) in input {
+        if c == '"' {
+            string_closed = true;
+            break;
+        }
+        str.push(c);
+        last_index = i;
+    }
+    if !string_closed {
+        return Err(TokenizingError::new(
+            context.line_number,
+            context.column_number,
+            last_index,
+            "Unclosed String",
+        ));
+    }
+
+    let content = TokenContent::String(str);
+    Ok(content)
+}
+
 pub fn tokenize_line(
     input_str: &str,
     tokens: &mut Vec<Token>,
@@ -59,12 +87,10 @@ pub fn tokenize_line(
         if c.is_whitespace() {
             continue;
         }
-
         let context = TokenContext {
             line_number: line_num,
             column_number: index,
         };
-
         if c.is_numeric() {
             let content = parse_number(input.by_ref(), c, &context)?;
             tokens.push(Token::new(NumberToken, context, Some(content)));
@@ -84,11 +110,10 @@ pub fn tokenize_line(
                 context,
                 Some(TokenContent::Operator(Mul)),
             ),
-            '"' => Token::new(
-                TokenType::OperatorToken,
-                context,
-                Some(TokenContent::Operator(Mul)),
-            ),
+            '"' => {
+                let content = Some(parse_string(input.by_ref(), &context)?);
+                Token::new(TokenType::OperatorToken, context, content)
+            }
             _ => {
                 return Err(TokenizingError::new(
                     line_num,

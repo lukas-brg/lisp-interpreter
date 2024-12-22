@@ -19,8 +19,8 @@ pub enum AstNodeType {
 
 #[derive(Debug, Clone)]
 pub struct AstNode {
-    node_type: AstNodeType,
-    node_value: Option<AstNodeValue>,
+    pub node_type: AstNodeType,
+    pub node_value: Option<AstNodeValue>,
     children: Vec<Box<AstNode>>,
 }
 
