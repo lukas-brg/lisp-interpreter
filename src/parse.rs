@@ -19,8 +19,7 @@ fn subtree(parser: &mut ParserState, parent: &mut AstNode) -> Result<(), Parsing
                 AstNodeType::OperatorNode,
                 Some(AstNodeValue::Operator(operator)),
             );
-
-            _parse(parser, &mut operator_node);
+            _parse(parser, &mut operator_node)?;
             parent.add_child(Box::new(operator_node));
         } else {
             let err = ParsingError::new(
@@ -93,5 +92,9 @@ impl ParserState {
         let token = self.tokens.get(self.current_token_idx);
         self.current_token_idx = std::cmp::min(self.tokens.len(), self.current_token_idx + 1);
         token
+    }
+
+    pub fn has_next(&self) -> bool {
+        self.current_token_idx < self.tokens.len() - 1
     }
 }
