@@ -1,14 +1,13 @@
 use crate::operatortype::Operator;
 
-
 #[derive(Debug, Clone, Copy)]
 pub enum TokenType {
-    LPAREN,
-    RPAREN,
-    OPERATOR,
-    NUMBER,
-    IDENTIFIER,
-    STRING,
+    LparenToken,
+    RparenToken,
+    OperatorToken,
+    NumberToken,
+    IdentifierToken,
+    StringToken,
 }
 
 #[derive(Debug, Clone)]
@@ -21,7 +20,7 @@ pub struct TokenContext {
 pub struct Token {
     pub token_type: TokenType,
     pub context: TokenContext,
-    pub content: Option<TokenContent>, 
+    pub content: Option<TokenContent>,
 }
 
 #[derive(Debug, Clone)]
@@ -33,7 +32,11 @@ pub enum TokenContent {
 }
 
 impl Token {
-    pub fn new(token_type: TokenType, context: TokenContext, content: Option<TokenContent>) -> Self {
+    pub fn new(
+        token_type: TokenType,
+        context: TokenContext,
+        content: Option<TokenContent>,
+    ) -> Self {
         Token {
             token_type,
             context,

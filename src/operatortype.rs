@@ -1,9 +1,9 @@
 #[derive(Debug, Clone)]
 pub enum Operator {
-    PLUS,
-    MINUS,
-    DIV,
-    MUL,
+    Plus,
+    Minus,
+    Div,
+    Mul,
     UnaryMinus,
-    UnaryPlus, 
+    UnaryPlus,
 }

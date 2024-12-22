@@ -1,26 +1,25 @@
-
-use crate::tokenize::tokenize;
-use crate::parse::parse;
 use crate::ast::AstNode;
-
+use crate::parse::parse;
+use crate::tokenize::tokenize;
 
 fn eval_tree(root: Box<AstNode>) {
-    for node in root.children() {
-        
-    }
+    for node in root.children() {}
 }
 
 pub fn eval(input: &str) {
-    
-    match tokenize(input) {
-        Ok(tokens) => {
-            let root = parse(tokens);
-            print!("\nParse result:\n{}", root);
-            eval_tree(root);
-        },
+    let tokens = match tokenize(input) {
+        Ok(tokens) => tokens,
         Err(e) => {
             panic!("\n{}", e);
         }
-    }
-    
+    };
+
+    let root = match parse(tokens) {
+        Ok(root) => root,
+        Err(e) => {
+            panic!("\n{}", e);
+        }
+    };
+    println!("\nParse result:\n{}", root);
+    eval_tree(root);
 }
