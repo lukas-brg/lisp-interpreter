@@ -66,7 +66,6 @@ fn _parse(parser: &mut ParserState, parent: &mut AstNode) -> Result<(), ParsingE
 pub fn parse(tokens: Vec<Token>) -> Result<AstNode, ParsingError> {
     let mut parser = ParserState::new(tokens);
     let mut root = AstNode::new(AstNodeType::Root, None);
-
     _parse(&mut parser, &mut root)?;
     Ok(root)
 }
