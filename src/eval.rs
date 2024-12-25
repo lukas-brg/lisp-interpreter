@@ -64,6 +64,7 @@ pub fn eval(input: &str) {
             panic!("\n{}", e);
         }
     };
+    // println!("\nTokenize result:\n{:?}", tokens);
 
     let root = match parse(tokens) {
         Ok(root) => root,

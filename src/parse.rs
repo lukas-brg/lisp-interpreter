@@ -48,12 +48,38 @@ fn number(token: &Token, parent: &mut AstNode) {
     parent.add_child(node);
 }
 
+fn identifier(token: &Token, parent: &mut AstNode) {
+    let content = token.content.clone().unwrap();
+
+    if let TokenContent::String(v) = content {
+        let ast_value = AstNodeValue::Identifier(v);
+        let node = AstNode::new(ast_value);
+        parent.add_child(node);
+    } else {
+        unreachable!();
+    }
+}
+
+fn string(token: &Token, parent: &mut AstNode) {
+    let content = token.content.clone().unwrap();
+
+    if let TokenContent::String(v) = content {
+        let ast_value = AstNodeValue::Literal(Value::String(v));
+        let node = AstNode::new(ast_value);
+        parent.add_child(node);
+    } else {
+        unreachable!();
+    }
+}
+
 fn _parse(parser: &mut ParserState, parent: &mut AstNode) -> Result<(), ParsingError> {
     while let Some(token) = parser.advance() {
         match token.token_type {
             TokenType::Rparen => return Ok(()),
             TokenType::Lparen => subtree(parser, parent)?,
             TokenType::Number => number(token, parent),
+            TokenType::Identifier => identifier(token, parent),
+            TokenType::String => string(token, parent),
             _ => {}
         };
     }

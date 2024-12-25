@@ -146,15 +146,32 @@ pub fn tokenize_line(
 
             '"' => {
                 let content = Some(parse_string(input.by_ref(), &context)?);
-                Token::new(TokenType::Operator, context, content)
+                Token::new(TokenType::String, context, content)
             }
             _ => {
-                return Err(TokenizingError::new(
-                    line_num,
-                    index,
-                    index,
-                    std::format!("Unrecognized Token '{}'", c).as_str(),
-                ));
+                if c.is_alphabetic() {
+                    let mut identifier = String::from(c);
+                    while let Some(&(_, c)) = input.peek() {
+                        if c.is_alphanumeric() || c == '-' {
+                            identifier.push(c);
+                            input.next();
+                        } else {
+                            break;
+                        }
+                    }
+                    Token::new(
+                        TokenType::Identifier,
+                        context,
+                        Some(TokenContent::String(identifier)),
+                    )
+                } else {
+                    return Err(TokenizingError::new(
+                        line_num,
+                        index,
+                        index,
+                        std::format!("Unrecognized Token '{}'", c).as_str(),
+                    ));
+                }
             }
         };
         tokens.push(token);
