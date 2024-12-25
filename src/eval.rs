@@ -28,29 +28,41 @@ impl Add for Value {
 
 impl std::ops::AddAssign for Value {
     fn add_assign(&mut self, rhs: Value) {
-        match (self, rhs) {
-            (Value::Int(l), Value::Int(r)) => *l += r,
-            (Value::Float(l), Value::Float(r)) => *l += r,
-            (Value::Int(l), Value::Float(r)) => *l += r as i64,
-            (Value::Float(l), Value::Int(r)) => *l += r as f64,
-            _ => {
-                unreachable!();
+        if let Value::Int(l) = self {
+            if let Value::Int(r) = rhs {
+                *l += r;
+                return;
             }
         }
+
+        let result: f64 = match (&*self, rhs) {
+            (Value::Float(l), Value::Float(r)) => *l + r,
+            (Value::Int(l), Value::Float(r)) => (*l as f64) + r,
+            (Value::Float(l), Value::Int(r)) => *l + (r as f64),
+            _ => unreachable!(),
+        };
+
+        *self = Value::Float(result);
     }
 }
 
 impl std::ops::MulAssign for Value {
     fn mul_assign(&mut self, rhs: Value) {
-        match (self, rhs) {
-            (Value::Int(l), Value::Int(r)) => *l *= r,
-            (Value::Float(l), Value::Float(r)) => *l *= r,
-            (Value::Int(l), Value::Float(r)) => *l *= r as i64,
-            (Value::Float(l), Value::Int(r)) => *l *= r as f64,
-            _ => {
-                unreachable!();
+        if let Value::Int(l) = self {
+            if let Value::Int(r) = rhs {
+                *l *= r;
+                return;
             }
         }
+
+        let result: f64 = match (&*self, rhs) {
+            (Value::Float(l), Value::Float(r)) => *l * r,
+            (Value::Int(l), Value::Float(r)) => (*l as f64) * r,
+            (Value::Float(l), Value::Int(r)) => *l * (r as f64),
+            _ => unreachable!(),
+        };
+
+        *self = Value::Float(result);
     }
 }
 
@@ -131,7 +143,7 @@ pub fn eval(input: &str) {
             panic!("\n{}", e);
         }
     };
-    println!("\nParse result:\n{}", root);
+    // println!("\nParse result:\n{}", root);
     let v = eval_tree(&root.children().get(0).unwrap());
     println!("{}", v);
 }

@@ -10,14 +10,14 @@ pub enum Value {
     None,
 }
 impl Value {
-    fn promote_to_float(self) -> Self {
+    pub fn promote_to_float(self) -> Self {
         match self {
             Value::Int(i) => Value::Float(i as f64),
             other => other,
         }
     }
 
-    fn is_numeric(&self) -> bool {
+    pub fn is_numeric(&self) -> bool {
         matches!(self, Value::Int(_) | Value::Float(_))
     }
 }
