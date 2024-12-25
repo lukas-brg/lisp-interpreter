@@ -2,33 +2,44 @@ use crate::operatortype::Operator;
 use std::fmt;
 
 #[derive(Debug, Clone)]
-pub enum AstNodeValue {
-    String(String),
-    Float(f64),
+pub enum Value {
     Int(i64),
-    Operator(Operator),
+    Float(f64),
+    Boolean(bool),
+    String(String),
+    None,
+}
+impl Value {
+    fn promote_to_float(self) -> Self {
+        match self {
+            Value::Int(i) => Value::Float(i as f64),
+            other => other,
+        }
+    }
+
+    fn is_numeric(&self) -> bool {
+        matches!(self, Value::Int(_) | Value::Float(_))
+    }
 }
 
 #[derive(Debug, Clone)]
-pub enum AstNodeType {
-    Operator,
-    Literal,
-    Identifier,
+pub enum AstNodeValue {
+    Operator(Operator),
+    Literal(Value),
+    Identifier(String),
     Root,
 }
 
 #[derive(Debug, Clone)]
 pub struct AstNode {
-    pub node_type: AstNodeType,
-    pub node_value: AstNodeValue,
+    pub value: AstNodeValue,
     children: Vec<AstNode>,
 }
 
 impl AstNode {
-    pub fn new(node_type: AstNodeType, node_value: AstNodeValue) -> AstNode {
+    pub fn new(value: AstNodeValue) -> AstNode {
         AstNode {
-            node_type,
-            node_value,
+            value,
             children: Vec::new(),
         }
     }
@@ -52,11 +63,7 @@ impl AstNode {
     fn fmt_with_indent(&self, f: &mut fmt::Formatter<'_>, indent_level: usize) -> fmt::Result {
         let indent = "  ".repeat(indent_level);
 
-        write!(f, "{}Node Type: {:?}, ", indent, self.node_type)?;
-
-        if let value = &self.node_value {
-            write!(f, "Value: {:?}, ", value)?;
-        }
+        write!(f, "{}Node Type: {:?}, ", indent, self.value)?;
 
         if !self.children.is_empty() {
             writeln!(f, "Children:")?;
@@ -71,21 +78,8 @@ impl AstNode {
     }
 }
 
-impl fmt::Display for AstNodeType {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{:?}", self)
-    }
-}
-
 impl fmt::Display for AstNodeValue {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            AstNodeValue::Int(i) => write!(f, "{}", i),
-            AstNodeValue::Float(fl) => write!(f, "{}", fl),
-            AstNodeValue::String(s) => write!(f, "'{}'", s),
-            _ => {
-                write!(f, "Int: ")
-            }
-        }
+        write!(f, "{:?}", self)
     }
 }

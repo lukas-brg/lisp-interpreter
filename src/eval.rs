@@ -1,7 +1,7 @@
 use crate::ast;
 use crate::ast::AstNode;
-use crate::ast::AstNodeType;
 use crate::ast::AstNodeValue;
+use crate::ast::Value;
 use crate::operatortype::Operator;
 use crate::parse::parse;
 use crate::tokenize::tokenize;
@@ -10,37 +10,6 @@ use std::fmt::write;
 use std::ops::Deref;
 use std::ops::{Add, Div, Mul, Sub};
 use std::path::Display;
-
-#[derive(Debug, Clone)]
-enum Value {
-    Int(i64),
-    Float(f64),
-    Boolean(bool),
-    String(String),
-    None,
-}
-
-impl Value {
-    fn promote_to_float(self) -> Self {
-        match self {
-            Value::Int(i) => Value::Float(i as f64),
-            other => other,
-        }
-    }
-
-    fn is_numeric(&self) -> bool {
-        matches!(self, Value::Int(_) | Value::Float(_))
-    }
-
-    fn from_ast_node_value(value: &AstNodeValue) -> Self {
-        return match value {
-            AstNodeValue::Int(v) => Value::Int(*v),
-            AstNodeValue::Float(v) => Value::Float(*v),
-            AstNodeValue::String(v) => Value::String(v.clone()),
-            _ => unreachable!(),
-        };
-    }
-}
 
 impl Add for Value {
     type Output = Value;
@@ -118,33 +87,27 @@ impl std::fmt::Display for Value {
 }
 
 fn eval_tree(node: &AstNode) -> Value {
-    match node.node_type {
-        AstNodeType::Operator => {
-            if let AstNodeValue::Operator(op) = &node.node_value {
-                match *op {
-                    Operator::Plus => {
-                        let mut value = Value::Int(0);
-                        for child in node.children() {
-                            value += eval_tree(child);
-                        }
-                        return value;
-                    }
-
-                    Operator::Mul => {
-                        let mut value = Value::Int(1);
-                        for child in node.children() {
-                            value *= eval_tree(child);
-                        }
-                        return value;
-                    }
-                    _ => unimplemented!("Operator not implemented"),
+    match &node.value {
+        AstNodeValue::Operator(op) => match *op {
+            Operator::Plus => {
+                let mut value = Value::Int(0);
+                for child in node.children() {
+                    value += eval_tree(child);
                 }
-            } else {
-                unreachable!("Node must have operator value");
+                return value;
             }
-        }
-        AstNodeType::Literal => {
-            return Value::from_ast_node_value(&node.node_value);
+
+            Operator::Mul => {
+                let mut value = Value::Int(1);
+                for child in node.children() {
+                    value *= eval_tree(child);
+                }
+                return value;
+            }
+            _ => unimplemented!("Operator not implemented"),
+        },
+        AstNodeValue::Literal(v) => {
+            return v.clone();
         }
 
         _ => {

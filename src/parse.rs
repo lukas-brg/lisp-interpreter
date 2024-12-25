@@ -1,4 +1,4 @@
-use crate::ast::{AstNode, AstNodeType, AstNodeValue};
+use crate::ast::{AstNode, AstNodeValue, Value};
 use crate::errors::ParsingError;
 use crate::operatortype::Operator;
 use crate::operatortype::Operator::{Div, Minus, Mul, Plus};
@@ -12,8 +12,7 @@ struct ParserState {
 fn subtree(parser: &mut ParserState, parent: &mut AstNode) -> Result<(), ParsingError> {
     if let Some(token) = parser.advance() {
         if let Some(TokenContent::Operator(operator)) = token.content.clone() {
-            let mut operator_node =
-                AstNode::new(AstNodeType::Operator, AstNodeValue::Operator(operator));
+            let mut operator_node = AstNode::new(AstNodeValue::Operator(operator));
             _parse(parser, &mut operator_node)?;
             parent.add_child(operator_node);
         } else {
@@ -39,12 +38,12 @@ fn number(token: &Token, parent: &mut AstNode) {
     let content = token.content.clone().unwrap();
 
     let ast_value = match content {
-        TokenContent::Float(v) => AstNodeValue::Float(v),
-        TokenContent::Int(v) => AstNodeValue::Int(v),
+        TokenContent::Float(v) => AstNodeValue::Literal(Value::Float(v)),
+        TokenContent::Int(v) => AstNodeValue::Literal(Value::Int(v)),
         _ => unreachable!(),
     };
 
-    let node = AstNode::new(AstNodeType::Literal, ast_value);
+    let node = AstNode::new(ast_value);
     parent.add_child(node);
 }
 
@@ -63,7 +62,7 @@ fn _parse(parser: &mut ParserState, parent: &mut AstNode) -> Result<(), ParsingE
 
 pub fn parse(tokens: Vec<Token>) -> Result<AstNode, ParsingError> {
     let mut parser = ParserState::new(tokens);
-    let mut root = AstNode::new(AstNodeType::Root, AstNodeValue::Int(0));
+    let mut root = AstNode::new(AstNodeValue::Root);
     _parse(&mut parser, &mut root)?;
     Ok(root)
 }
