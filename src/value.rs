@@ -19,6 +19,17 @@ impl Value {
     pub fn is_numeric(&self) -> bool {
         matches!(self, Value::Int(_) | Value::Float(_))
     }
+
+    pub fn int_div_assign(&mut self, rhs: Value) {
+        let result: f64 = match (&*self, rhs) {
+            (Value::Int(l), Value::Int(r)) => *l as f64 / r as f64,
+            (Value::Float(l), Value::Float(r)) => *l / r,
+            (Value::Int(l), Value::Float(r)) => (*l as f64) / r,
+            (Value::Float(l), Value::Int(r)) => *l / (r as f64),
+            _ => unreachable!(),
+        };
+        *self = Value::Int(result as i64);
+    }
 }
 
 impl Add for Value {
@@ -73,6 +84,24 @@ impl std::ops::MulAssign for Value {
         };
 
         *self = Value::Float(result);
+    }
+}
+
+impl std::ops::DivAssign for Value {
+    fn div_assign(&mut self, rhs: Value) {
+        let result: f64 = match (&*self, rhs) {
+            (Value::Int(l), Value::Int(r)) => *l as f64 / r as f64,
+            (Value::Float(l), Value::Float(r)) => *l / r,
+            (Value::Int(l), Value::Float(r)) => (*l as f64) / r,
+            (Value::Float(l), Value::Int(r)) => *l / (r as f64),
+            _ => unreachable!(),
+        };
+
+        if result.fract() == 0.0 {
+            *self = Value::Int(result as i64);
+        } else {
+            *self = Value::Float(result);
+        }
     }
 }
 

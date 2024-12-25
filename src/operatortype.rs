@@ -3,6 +3,7 @@ pub enum Operator {
     Plus,
     Minus,
     Div,
+    IntDiv,
     Mul,
     UnaryMinus,
     UnaryPlus,

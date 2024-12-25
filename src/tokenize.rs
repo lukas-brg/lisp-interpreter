@@ -1,7 +1,7 @@
 use std::str::CharIndices;
 
 use crate::errors::TokenizingError;
-use crate::operatortype::Operator::{Div, Minus, Mul, Plus};
+use crate::operatortype::Operator::{Div, IntDiv, Minus, Mul, Plus};
 use crate::token::TokenContext;
 use crate::token::TokenType::{Lparen, Number, Operator, Rparen};
 use crate::token::{Token, TokenContent, TokenType};
@@ -79,7 +79,7 @@ pub fn tokenize_line(
     tokens: &mut Vec<Token>,
     line_num: usize,
 ) -> Result<(), TokenizingError> {
-    let mut input = input_str.char_indices();
+    let mut input = input_str.char_indices().peekable();
 
     while let Some((index, c)) = input.next() {
         if c.is_whitespace() {
@@ -108,6 +108,17 @@ pub fn tokenize_line(
                 context,
                 Some(TokenContent::Operator(Mul)),
             ),
+            '/' => {
+                let content = if let Some((_, '/')) = input.peek() {
+                    input.next();
+                    TokenContent::Operator(IntDiv)
+                } else {
+                    TokenContent::Operator(Div)
+                };
+
+                Token::new(TokenType::Operator, context, Some(content))
+            }
+
             '"' => {
                 let content = Some(parse_string(input.by_ref(), &context)?);
                 Token::new(TokenType::Operator, context, content)

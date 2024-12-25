@@ -24,6 +24,20 @@ fn eval_tree(node: &AstNode) -> Value {
                 }
                 return value;
             }
+            Operator::Div => {
+                let mut value = eval_tree(node.children().get(0).unwrap());
+                for child in node.children().iter().skip(1) {
+                    value /= eval_tree(child);
+                }
+                return value;
+            }
+            Operator::IntDiv => {
+                let mut value = eval_tree(node.children().get(0).unwrap());
+                for child in node.children().iter().skip(1) {
+                    value.int_div_assign(eval_tree(child));
+                }
+                return value;
+            }
             _ => unimplemented!("Operator not implemented"),
         },
         AstNodeValue::Literal(v) => {
