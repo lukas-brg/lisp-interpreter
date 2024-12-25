@@ -103,6 +103,11 @@ pub fn tokenize_line(
                 context,
                 Some(TokenContent::Operator(Plus)),
             ),
+            '-' => Token::new(
+                TokenType::Operator,
+                context,
+                Some(TokenContent::Operator(Minus)),
+            ),
             '*' => Token::new(
                 TokenType::Operator,
                 context,

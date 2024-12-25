@@ -16,7 +16,13 @@ fn eval_tree(node: &AstNode) -> Value {
                 }
                 return value;
             }
-
+            Operator::Minus => {
+                let mut value = eval_tree(node.children().get(0).unwrap());
+                for child in node.children().iter().skip(1) {
+                    value -= eval_tree(child);
+                }
+                return value;
+            }
             Operator::Mul => {
                 let mut value = Value::Int(1);
                 for child in node.children() {

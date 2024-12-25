@@ -67,6 +67,26 @@ impl std::ops::AddAssign for Value {
     }
 }
 
+impl std::ops::SubAssign for Value {
+    fn sub_assign(&mut self, rhs: Value) {
+        if let Value::Int(l) = self {
+            if let Value::Int(r) = rhs {
+                *l -= r;
+                return;
+            }
+        }
+
+        let result: f64 = match (&*self, rhs) {
+            (Value::Float(l), Value::Float(r)) => *l - r,
+            (Value::Int(l), Value::Float(r)) => (*l as f64) - r,
+            (Value::Float(l), Value::Int(r)) => *l - (r as f64),
+            _ => unreachable!(),
+        };
+
+        *self = Value::Float(result);
+    }
+}
+
 impl std::ops::MulAssign for Value {
     fn mul_assign(&mut self, rhs: Value) {
         if let Value::Int(l) = self {
