@@ -1,5 +1,7 @@
 use std::str::CharIndices;
 
+use itertools::Itertools;
+
 use crate::errors::TokenizingError;
 use crate::operatortype::Operator::{Div, IntDiv, Minus, Mul, Plus};
 use crate::token::TokenContext;
@@ -105,11 +107,27 @@ pub fn tokenize_line(
                 context,
                 Some(TokenContent::Operator(Plus)),
             ),
-            '-' => Token::new(
-                TokenType::Operator,
-                context,
-                Some(TokenContent::Operator(Minus)),
-            ),
+            '-' => {
+                let mut is_unary_minus = false;
+                if let Some((_, next_c)) = input.peek() {
+                    if next_c.is_numeric() {
+                        is_unary_minus = true;
+                    }
+                };
+
+                let token = if is_unary_minus {
+                    let content = parse_number(input.by_ref(), c, &context)?;
+                    Token::new(TokenType::Number, context, Some(content))
+                } else {
+                    Token::new(
+                        TokenType::Operator,
+                        context,
+                        Some(TokenContent::Operator(Minus)),
+                    )
+                };
+
+                token
+            }
             '*' => Token::new(
                 TokenType::Operator,
                 context,
