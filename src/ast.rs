@@ -1,26 +1,6 @@
 use crate::operatortype::Operator;
+use crate::value::Value;
 use std::fmt;
-
-#[derive(Debug, Clone)]
-pub enum Value {
-    Int(i64),
-    Float(f64),
-    Boolean(bool),
-    String(String),
-    None,
-}
-impl Value {
-    pub fn promote_to_float(self) -> Self {
-        match self {
-            Value::Int(i) => Value::Float(i as f64),
-            other => other,
-        }
-    }
-
-    pub fn is_numeric(&self) -> bool {
-        matches!(self, Value::Int(_) | Value::Float(_))
-    }
-}
 
 #[derive(Debug, Clone)]
 pub enum AstNodeValue {

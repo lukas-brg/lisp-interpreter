@@ -9,6 +9,7 @@ mod operatortype;
 mod parse;
 mod token;
 mod tokenize;
+mod value;
 
 fn main() {
     //eval("(* 2 (+ 2.5 4))");
@@ -28,7 +29,6 @@ fn main() {
         }
 
         if trimmed == "exit" || trimmed == "quit" {
-            println!("Goodbye!");
             break;
         }
 

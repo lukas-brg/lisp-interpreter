@@ -10,6 +10,12 @@ pub struct TokenizingError {
     pub message: String,
 }
 
+#[derive(Debug)]
+pub struct RuntimeError {}
+
+#[derive(Debug)]
+pub struct Error {}
+
 impl fmt::Display for TokenizingError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(

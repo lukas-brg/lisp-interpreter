@@ -1,8 +1,9 @@
-use crate::ast::{AstNode, AstNodeValue, Value};
+use crate::ast::{AstNode, AstNodeValue};
 use crate::errors::ParsingError;
 use crate::operatortype::Operator;
 use crate::operatortype::Operator::{Div, Minus, Mul, Plus};
 use crate::token::{Token, TokenContent, TokenContext, TokenType};
+use crate::value::Value;
 
 struct ParserState {
     tokens: Vec<Token>,
