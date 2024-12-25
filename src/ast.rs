@@ -20,12 +20,12 @@ pub enum AstNodeType {
 #[derive(Debug, Clone)]
 pub struct AstNode {
     pub node_type: AstNodeType,
-    pub node_value: Option<AstNodeValue>,
+    pub node_value: AstNodeValue,
     children: Vec<AstNode>,
 }
 
 impl AstNode {
-    pub fn new(node_type: AstNodeType, node_value: Option<AstNodeValue>) -> AstNode {
+    pub fn new(node_type: AstNodeType, node_value: AstNodeValue) -> AstNode {
         AstNode {
             node_type,
             node_value,
@@ -54,7 +54,7 @@ impl AstNode {
 
         write!(f, "{}Node Type: {:?}, ", indent, self.node_type)?;
 
-        if let Some(value) = &self.node_value {
+        if let value = &self.node_value {
             write!(f, "Value: {:?}, ", value)?;
         }
 

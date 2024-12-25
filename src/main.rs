@@ -10,5 +10,5 @@ mod token;
 mod tokenize;
 
 fn main() {
-    eval("(+ 1 (* 2 3))");
+    eval("(* 2 (+ 2 4))");
 }

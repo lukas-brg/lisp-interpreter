@@ -12,10 +12,8 @@ struct ParserState {
 fn subtree(parser: &mut ParserState, parent: &mut AstNode) -> Result<(), ParsingError> {
     if let Some(token) = parser.advance() {
         if let Some(TokenContent::Operator(operator)) = token.content.clone() {
-            let mut operator_node = AstNode::new(
-                AstNodeType::Operator,
-                Some(AstNodeValue::Operator(operator)),
-            );
+            let mut operator_node =
+                AstNode::new(AstNodeType::Operator, AstNodeValue::Operator(operator));
             _parse(parser, &mut operator_node)?;
             parent.add_child(operator_node);
         } else {
@@ -46,7 +44,7 @@ fn number(token: &Token, parent: &mut AstNode) {
         _ => unreachable!(),
     };
 
-    let node = AstNode::new(AstNodeType::Literal, Some(ast_value));
+    let node = AstNode::new(AstNodeType::Literal, ast_value);
     parent.add_child(node);
 }
 
@@ -65,7 +63,7 @@ fn _parse(parser: &mut ParserState, parent: &mut AstNode) -> Result<(), ParsingE
 
 pub fn parse(tokens: Vec<Token>) -> Result<AstNode, ParsingError> {
     let mut parser = ParserState::new(tokens);
-    let mut root = AstNode::new(AstNodeType::Root, None);
+    let mut root = AstNode::new(AstNodeType::Root, AstNodeValue::Int(0));
     _parse(&mut parser, &mut root)?;
     Ok(root)
 }
