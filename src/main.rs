@@ -12,7 +12,7 @@ mod tokenize;
 mod value;
 
 fn main() {
-    //eval("(* 2 (+ 2.5 4))");
+    //eval("(/ (+ 1.43 4.0) (+ 32 5))");
     loop {
         print!("> ");
         io::stdout().flush().unwrap();

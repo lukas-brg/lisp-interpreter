@@ -7,17 +7,17 @@ use crate::token::TokenType::{Lparen, Number, Operator, Rparen};
 use crate::token::{Token, TokenContent, TokenType};
 
 fn parse_number<I>(
-    input: I,
+    input: &mut std::iter::Peekable<I>,
     first_char: char,
     context: &TokenContext,
 ) -> Result<TokenContent, TokenizingError>
 where
-    I: IntoIterator<Item = (usize, char)>,
+    I: std::iter::Iterator<Item = (usize, char)>,
 {
     let mut float = false;
     let mut num_str = String::from(first_char);
 
-    for (i, c) in input {
+    while let Some(&(i, c)) = input.peek() {
         if !c.is_numeric() && c != '.' {
             break;
         }
@@ -33,6 +33,7 @@ where
             float = true;
         }
         num_str.push(c);
+        input.next();
     }
 
     let content = if float {
@@ -53,6 +54,7 @@ where
     let mut str = String::new();
     let mut string_closed = false;
     let mut last_index = 0;
+
     for (i, c) in input {
         if c == '"' {
             string_closed = true;
