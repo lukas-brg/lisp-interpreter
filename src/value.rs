@@ -33,6 +33,8 @@ impl Value {
     }
 
     pub fn pow_assign(&mut self, rhs: Self) {
+        if !(self.is_numeric() && rhs.is_numeric()) {}
+
         let result: f64 = match (&mut *self, rhs) {
             (Value::Int(l), Value::Int(r)) => (*l as f64).powf(r as f64),
             (Value::Float(l), Value::Float(r)) => l.powf(r),

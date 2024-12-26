@@ -1,7 +1,10 @@
 use crate::errors::EvalError;
 use crate::eval::eval;
+
 use rustyline::error::ReadlineError;
-use rustyline::Editor;
+use rustyline::KeyPress;
+use rustyline::{Cmd, CompletionType, Config, EditMode, Editor};
+
 use std::io::{self, Write};
 
 mod ast;
@@ -24,6 +27,20 @@ fn main() {
     let mut rl = Editor::<()>::new();
     let _ = rl.load_history(".repl_history");
     let mut buffer = String::new();
+
+    rl.bind_sequence(
+        KeyPress::ControlLeft,
+        Cmd::Move(rustyline::Movement::BackwardWord(1, rustyline::Word::Emacs)),
+    );
+    rl.bind_sequence(
+        KeyPress::ControlRight,
+        Cmd::Move(rustyline::Movement::ForwardWord(
+            1,
+            rustyline::At::BeforeEnd,
+            rustyline::Word::Emacs,
+        )),
+    );
+
     loop {
         let prompt = if buffer.is_empty() { "> " } else { ".. " };
         match rl.readline(prompt) {

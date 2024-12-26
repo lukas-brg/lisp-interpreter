@@ -7,4 +7,10 @@ pub enum Operator {
     Mul,
     Modulo,
     Power,
+    Eq,
+    Neq,
+    Geq,
+    Leq,
+    Lt,
+    Gt,
 }

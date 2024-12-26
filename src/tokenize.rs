@@ -1,7 +1,9 @@
 use std::str::CharIndices;
 
 use crate::errors::TokenizingError;
-use crate::operatortype::Operator::{Div, IntDiv, Minus, Modulo, Mul, Plus, Power};
+use crate::operatortype::Operator::{
+    Div, Eq, Geq, Gt, IntDiv, Leq, Lt, Minus, Modulo, Mul, Neq, Plus, Power,
+};
 use crate::token::TokenContext;
 use crate::token::TokenType::{Lparen, Number, Operator, Rparen};
 use crate::token::{Token, TokenContent, TokenType};
@@ -141,6 +143,52 @@ pub fn tokenize_line(
                 context,
                 Some(TokenContent::Operator(Power)),
             ),
+            '>' => {
+                let content = if let Some((_, '=')) = input.peek() {
+                    _ = input.next();
+                    TokenContent::Operator(Geq)
+                } else {
+                    TokenContent::Operator(Gt)
+                };
+                Token::new(TokenType::Operator, context, Some(content))
+            }
+            '<' => {
+                let content = if let Some((_, '=')) = input.peek() {
+                    _ = input.next();
+                    TokenContent::Operator(Leq)
+                } else {
+                    TokenContent::Operator(Lt)
+                };
+                Token::new(TokenType::Operator, context, Some(content))
+            }
+            '=' => {
+                let content = if let Some((_, '=')) = input.peek() {
+                    _ = input.next();
+                    TokenContent::Operator(Eq)
+                } else {
+                    return Err(TokenizingError::new(
+                        line_num,
+                        index,
+                        index,
+                        std::format!("Unrecognized Token '{c}'").as_str(),
+                    ));
+                };
+                Token::new(TokenType::Operator, context, Some(content))
+            }
+            '!' => {
+                let content = if let Some((_, '=')) = input.peek() {
+                    _ = input.next();
+                    TokenContent::Operator(Neq)
+                } else {
+                    return Err(TokenizingError::new(
+                        line_num,
+                        index,
+                        index,
+                        std::format!("Unrecognized Token '{c}'").as_str(),
+                    ));
+                };
+                Token::new(TokenType::Operator, context, Some(content))
+            }
             '/' => {
                 let content = if let Some((_, '/')) = input.peek() {
                     input.next();
