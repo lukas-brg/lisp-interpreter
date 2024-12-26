@@ -7,4 +7,5 @@ pub enum Operator {
     Mul,
     UnaryMinus,
     UnaryPlus,
+    Modulo,
 }

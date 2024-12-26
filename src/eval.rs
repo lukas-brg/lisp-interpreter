@@ -31,6 +31,13 @@ fn eval_tree(node: &AstNode) -> Value {
                 }
                 return value;
             }
+            Operator::Modulo => {
+                let mut value = eval_tree(node.children().get(0).unwrap());
+                for child in node.children().iter().skip(1) {
+                    value %= eval_tree(child);
+                }
+                return value;
+            }
             Operator::Div => {
                 let mut value = eval_tree(node.children().get(0).unwrap());
                 for child in node.children().iter().skip(1) {

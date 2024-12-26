@@ -108,6 +108,26 @@ impl std::ops::MulAssign for Value {
     }
 }
 
+impl std::ops::RemAssign for Value {
+    fn rem_assign(&mut self, rhs: Self) {
+        let result: f64 = match (&mut *self, rhs) {
+            (Value::Int(l), Value::Int(r)) => {
+                *l = ((*l % r) + r) % r;
+                return;
+            }
+            (Value::Float(l), Value::Float(r)) => ((*l % r) + r) % r,
+            (Value::Int(l), Value::Float(r)) => ((*l as f64 % r) + r) % r,
+            (Value::Float(l), Value::Int(r)) => {
+                let r = r as f64;
+                ((*l % r) + r) % r
+            }
+            _ => unreachable!(),
+        };
+
+        *self = Value::Float(result);
+    }
+}
+
 impl std::ops::DivAssign for Value {
     fn div_assign(&mut self, rhs: Value) {
         let result: f64 = match (&*self, rhs) {

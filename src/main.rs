@@ -25,7 +25,7 @@ fn main() {
     let _ = rl.load_history(".repl_history");
     let mut buffer = String::new();
     loop {
-        let prompt = if buffer.is_empty() { "> " } else { ">> " };
+        let prompt = if buffer.is_empty() { "> " } else { ".. " };
         match rl.readline(prompt) {
             Ok(line) => {
                 let trimmed = line.trim();
@@ -46,7 +46,7 @@ fn main() {
                     rl.add_history_entry(&buffer);
 
                     if let Err(err) = eval(&buffer) {
-                        println!("Error: {}", err.message());
+                        eprintln!("Error: {}", err.message());
                     }
 
                     buffer.clear();
@@ -61,7 +61,7 @@ fn main() {
                 break;
             }
             Err(err) => {
-                println!("Error: {:?}", err);
+                eprintln!("Error: {:?}", err);
                 break;
             }
         }
