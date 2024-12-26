@@ -1,7 +1,5 @@
 use std::str::CharIndices;
 
-use itertools::Itertools;
-
 use crate::errors::TokenizingError;
 use crate::operatortype::Operator::{Div, IntDiv, Minus, Mul, Plus};
 use crate::token::TokenContext;

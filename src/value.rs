@@ -8,6 +8,7 @@ pub enum Value {
     String(String),
     None,
 }
+
 impl Value {
     pub fn promote_to_float(self) -> Self {
         match self {
