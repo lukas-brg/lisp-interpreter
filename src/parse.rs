@@ -20,7 +20,7 @@ fn subtree(parser: &mut ParserState, parent: &mut AstNode) -> Result<(), Parsing
             let err = ParsingError::new(
                 Some(token.clone()),
                 format!(
-                    "Expected an operator after '(', found {:?}",
+                    "Expected an operation after '(', found {:?}",
                     token.token_type
                 )
                 .as_str(),

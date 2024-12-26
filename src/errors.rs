@@ -11,10 +11,25 @@ pub struct TokenizingError {
 }
 
 #[derive(Debug)]
-pub struct RuntimeError {}
+pub struct RuntimeError {
+    pub message: String,
+}
 
 #[derive(Debug)]
-pub struct Error {}
+pub enum EvalError {
+    TokenizingError(TokenizingError),
+    ParsingError(ParsingError),
+    RuntimeError(RuntimeError),
+}
+impl EvalError {
+    pub fn message(&self) -> &str {
+        match self {
+            EvalError::TokenizingError(err) => &err.message,
+            EvalError::ParsingError(err) => &err.message,
+            EvalError::RuntimeError(err) => &err.message,
+        }
+    }
+}
 
 impl fmt::Display for TokenizingError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {

@@ -1,3 +1,4 @@
+use crate::errors::EvalError;
 use crate::eval::eval;
 use rustyline::error::ReadlineError;
 use rustyline::Editor;
@@ -43,7 +44,11 @@ fn main() {
                         buffer
                     };
                     rl.add_history_entry(&buffer);
-                    eval(&buffer);
+
+                    if let Err(err) = eval(&buffer) {
+                        println!("Error: {}", err.message());
+                    }
+
                     buffer.clear();
                 } else {
                     buffer.push(' ');

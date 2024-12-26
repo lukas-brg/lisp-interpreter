@@ -1,6 +1,7 @@
 use crate::ast;
 use crate::ast::AstNode;
 use crate::ast::AstNodeValue;
+use crate::errors::{EvalError, ParsingError, TokenizingError};
 use crate::operatortype::Operator;
 use crate::parse::parse;
 use crate::tokenize::tokenize;
@@ -57,11 +58,11 @@ fn eval_tree(node: &AstNode) -> Value {
     }
 }
 
-pub fn eval(input: &str) {
+pub fn eval(input: &str) -> Result<(), EvalError> {
     let tokens = match tokenize(input) {
         Ok(tokens) => tokens,
         Err(e) => {
-            panic!("\n{}", e);
+            return Err(EvalError::TokenizingError(e));
         }
     };
     // println!("\nTokenize result:\n{:?}", tokens);
@@ -69,10 +70,11 @@ pub fn eval(input: &str) {
     let root = match parse(tokens) {
         Ok(root) => root,
         Err(e) => {
-            panic!("\n{}", e);
+            return Err(EvalError::ParsingError(e));
         }
     };
     // println!("\nParse result:\n{}", root);
     let v = eval_tree(&root.children().get(0).unwrap());
     println!("{}", v);
+    Ok(())
 }
