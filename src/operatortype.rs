@@ -5,7 +5,6 @@ pub enum Operator {
     Div,
     IntDiv,
     Mul,
-    UnaryMinus,
-    UnaryPlus,
     Modulo,
+    Power,
 }

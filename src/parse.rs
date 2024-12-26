@@ -10,28 +10,28 @@ struct ParserState {
     current_token_idx: usize,
 }
 
-fn subtree(parser: &mut ParserState, parent: &mut AstNode) -> Result<(), ParsingError> {
+fn expression(parser: &mut ParserState, parent: &mut AstNode) -> Result<(), ParsingError> {
     if let Some(token) = parser.advance() {
         if let Some(TokenContent::Operator(operator)) = token.content.clone() {
             let mut operator_node = AstNode::new(AstNodeValue::Operator(operator));
             _parse(parser, &mut operator_node)?;
             parent.add_child(operator_node);
         } else {
-            let err = ParsingError::new(
-                Some(token.clone()),
-                format!(
-                    "Expected an operation after '(', found {:?}",
-                    token.token_type
-                )
-                .as_str(),
-            );
-            return Err(err);
+            _parse(parser, parent);
+            // let err = ParsingError::new(
+            //     Some(token.clone()),
+            //     format!(
+            //         "Expected an operation after '(', found {:?}",
+            //         token.token_type
+            //     )
+            //     .as_str(),
+            // );
+            // return Err(err);
         }
     } else {
         let err = ParsingError::new(None, "Expected token after '(' found EOF");
         return Err(err);
     }
-
     Ok(())
 }
 
@@ -76,7 +76,7 @@ fn _parse(parser: &mut ParserState, parent: &mut AstNode) -> Result<(), ParsingE
     while let Some(token) = parser.advance() {
         match token.token_type {
             TokenType::Rparen => return Ok(()),
-            TokenType::Lparen => subtree(parser, parent)?,
+            TokenType::Lparen => expression(parser, parent)?,
             TokenType::Number => number(token, parent),
             TokenType::Identifier => identifier(token, parent),
             TokenType::String => string(token, parent),

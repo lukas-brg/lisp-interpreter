@@ -31,6 +31,31 @@ impl Value {
         };
         *self = Value::Int(result as i64);
     }
+
+    pub fn pow_assign(&mut self, rhs: Self) {
+        let result: f64 = match (&mut *self, rhs) {
+            (Value::Int(l), Value::Int(r)) => (*l as f64).powf(r as f64),
+            (Value::Float(l), Value::Float(r)) => l.powf(r),
+            (Value::Int(l), Value::Float(r)) => (*l as f64).powf(r),
+            (Value::Float(l), Value::Int(r)) => l.powf(r as f64),
+            _ => unreachable!(),
+        };
+
+        if result.fract() == 0.0 {
+            *self = Value::Int(result as i64);
+        } else {
+            *self = Value::Float(result);
+        }
+    }
+
+    pub fn negate(&mut self) {
+        match self {
+            Value::Boolean(v) => *v = !(*v),
+            Value::Float(v) => *v *= (-1.0),
+            Value::Int(v) => *v *= (-1),
+            _ => unreachable!(),
+        }
+    }
 }
 
 impl Add for Value {

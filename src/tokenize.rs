@@ -1,7 +1,7 @@
 use std::str::CharIndices;
 
 use crate::errors::TokenizingError;
-use crate::operatortype::Operator::{Div, IntDiv, Minus, Modulo, Mul, Plus};
+use crate::operatortype::Operator::{Div, IntDiv, Minus, Modulo, Mul, Plus, Power};
 use crate::token::TokenContext;
 use crate::token::TokenType::{Lparen, Number, Operator, Rparen};
 use crate::token::{Token, TokenContent, TokenType};
@@ -135,6 +135,11 @@ pub fn tokenize_line(
                 TokenType::Operator,
                 context,
                 Some(TokenContent::Operator(Modulo)),
+            ),
+            '^' => Token::new(
+                TokenType::Operator,
+                context,
+                Some(TokenContent::Operator(Power)),
             ),
             '/' => {
                 let content = if let Some((_, '/')) = input.peek() {

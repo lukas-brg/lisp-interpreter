@@ -19,6 +19,10 @@ fn eval_tree(node: &AstNode) -> Value {
             }
             Operator::Minus => {
                 let mut value = eval_tree(node.children().get(0).unwrap());
+                if node.children().len() == 1 {
+                    value.negate();
+                    return value;
+                }
                 for child in node.children().iter().skip(1) {
                     value -= eval_tree(child);
                 }
@@ -49,6 +53,13 @@ fn eval_tree(node: &AstNode) -> Value {
                 let mut value = eval_tree(node.children().get(0).unwrap());
                 for child in node.children().iter().skip(1) {
                     value.int_div_assign(eval_tree(child));
+                }
+                return value;
+            }
+            Operator::Power => {
+                let mut value = eval_tree(node.children().get(0).unwrap());
+                for child in node.children().iter().skip(1) {
+                    value.pow_assign(eval_tree(child));
                 }
                 return value;
             }
