@@ -148,7 +148,7 @@ fn eval_operator(node: &AstNode, op: &Operator) -> Result<Value, RuntimeError> {
         Operator::Gt => eval_gt(node),
         Operator::Geq => eval_geq(node),
         Operator::Neq => eval_neq(node),
-        _ => unimplemented!("Operator not implemented"),
+        //_ => unimplemented!("Operator not implemented"),
     }
 }
 

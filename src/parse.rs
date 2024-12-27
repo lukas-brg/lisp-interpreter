@@ -25,6 +25,7 @@ impl ParserState {
         token
     }
 
+    #[allow(dead_code)]
     pub fn has_next(&self) -> bool {
         self.next_token_idx < self.tokens.len() - 1
     }

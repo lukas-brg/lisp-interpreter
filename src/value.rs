@@ -1,8 +1,5 @@
 use crate::errors::RuntimeError;
-use std::{
-    fmt::Error,
-    ops::{Add, Mul},
-};
+use std::ops::{Add, Mul};
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum NumBase {
@@ -37,11 +34,12 @@ pub enum Value {
     Float(f64),
     Boolean(bool),
     String(String),
-    List(Vec<Value>),
+    _List(Vec<Value>),
     None,
 }
 
 impl Value {
+    #[allow(dead_code)]
     pub fn promote_to_float(self) -> Self {
         match self {
             Value::Int(i) => Value::Float(i as f64),
