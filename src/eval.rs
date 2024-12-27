@@ -110,6 +110,20 @@ fn eval_tree(node: &AstNode) -> Result<Value, RuntimeError> {
                 }
                 return Ok(Value::Boolean(true));
             }
+            Operator::Neq => {
+                let mut vals: Vec<Value> = Vec::new();
+                for child in node.children() {
+                    let val = eval_tree(child)?;
+                    vals.push(val);
+                }
+
+                for (a, b) in vals.iter().tuple_combinations() {
+                    if a.compare_to(b)? == 0 {
+                        return Ok(Value::Boolean(false));
+                    }
+                }
+                return Ok(Value::Boolean(true));
+            }
             _ => unimplemented!("Operator not implemented"),
         },
         AstNodeValue::Literal(v) => {
