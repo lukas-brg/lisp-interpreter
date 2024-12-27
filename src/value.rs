@@ -1,5 +1,35 @@
 use crate::errors::RuntimeError;
-use std::ops::{Add, Mul};
+use std::{
+    fmt::Error,
+    ops::{Add, Mul},
+};
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum NumBase {
+    Dec,
+    Hex,
+    Oct,
+    Bin,
+}
+impl NumBase {
+    pub fn is_valid_digit(self, digit: char) -> bool {
+        match self {
+            NumBase::Dec => digit.is_numeric(),
+            NumBase::Bin => digit == '0' || digit == '1',
+            NumBase::Oct => digit >= '0' && digit <= '7',
+            NumBase::Hex => digit.is_ascii_hexdigit(),
+        }
+    }
+
+    pub fn parse_int(self, num_str: String) -> Result<i64, std::num::ParseIntError> {
+        match self {
+            NumBase::Dec => num_str.parse(),
+            NumBase::Bin => i64::from_str_radix(&num_str.trim_start_matches("0b"), 2),
+            NumBase::Oct => i64::from_str_radix(&num_str.trim_start_matches("0o"), 8),
+            NumBase::Hex => i64::from_str_radix(&num_str.trim_start_matches("0x"), 16),
+        }
+    }
+}
 
 #[derive(Debug, Clone)]
 pub enum Value {

@@ -157,8 +157,7 @@ fn eval_tree(node: &AstNode) -> Result<Value, RuntimeError> {
         AstNodeValue::Operator(op) => eval_operator(node, op),
         AstNodeValue::Literal(v) => Ok(v.clone()),
         _ => {
-            eprintln!("Unreachable {}", node);
-            unreachable!();
+            unimplemented!("Not implemented  {}", node);
         }
     }
 }

@@ -4,7 +4,6 @@ use rustyline::error::ReadlineError;
 use rustyline::KeyPress;
 use rustyline::{Cmd, Editor};
 
-
 fn is_complete_expression(input: &str) -> bool {
     let open = input.matches('(').count();
     let close = input.matches(')').count();

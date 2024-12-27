@@ -1,4 +1,3 @@
-
 use crate::errors::TokenizingError;
 use crate::operatortype::Operator::{
     Div, Eq, Geq, Gt, IntDiv, Leq, Lt, Minus, Modulo, Mul, Neq, Plus, Power,
@@ -6,6 +5,8 @@ use crate::operatortype::Operator::{
 use crate::token::TokenContext;
 use crate::token::TokenType::{Lparen, Number, Operator, Rparen};
 use crate::token::{Token, TokenContent, TokenType};
+
+use crate::value::NumBase;
 
 fn parse_number<I>(
     input: &mut std::iter::Peekable<I>,
@@ -16,10 +17,43 @@ where
     I: std::iter::Iterator<Item = (usize, char)>,
 {
     let mut float = false;
-    let mut num_str = String::from(first_char);
+    let mut base = NumBase::Dec;
+    let mut num_str = String::new();
+    let mut sign = 1;
 
+    let digit_after_sign = if first_char == '-' {
+        let (_, c) = input.next().unwrap();
+        sign = -1;
+        c
+    } else {
+        first_char
+    };
+    num_str.push(digit_after_sign);
+
+    if digit_after_sign == '0' {
+        if let Some(&(_, nextc)) = input.peek() {
+            match nextc {
+                'x' => {
+                    num_str.push(nextc);
+                    input.next();
+                    base = NumBase::Hex;
+                }
+                'b' => {
+                    num_str.push(nextc);
+                    input.next();
+                    base = NumBase::Bin;
+                }
+                'o' => {
+                    num_str.push(nextc);
+                    input.next();
+                    base = NumBase::Oct;
+                }
+                _ => {}
+            }
+        }
+    }
     while let Some(&(i, c)) = input.peek() {
-        if !c.is_numeric() && c != '.' {
+        if !base.is_valid_digit(c) && c != '.' {
             break;
         }
         if c == '.' {
@@ -31,6 +65,14 @@ where
                     "Invalid number: multiple decimal points found",
                 ));
             }
+            if NumBase::Dec != base {
+                return Err(TokenizingError::new(
+                    context.line_number,
+                    context.column_number,
+                    i,
+                    "Floats are only supported for decimal numbers",
+                ));
+            }
             float = true;
         }
         num_str.push(c);
@@ -39,10 +81,10 @@ where
 
     let content = if float {
         let parsed_float: f64 = num_str.parse().expect("Failed to parse float");
-        TokenContent::Float(parsed_float)
+        TokenContent::Float(sign as f64 * parsed_float)
     } else {
-        let parsed_int: i64 = num_str.parse::<i64>().unwrap();
-        TokenContent::Int(parsed_int)
+        let parsed_int: i64 = base.parse_int(num_str).unwrap();
+        TokenContent::Int(sign * parsed_int)
     };
 
     Ok(content)
@@ -101,11 +143,7 @@ pub fn tokenize_line(
         let token = match c {
             '(' => Token::new(Lparen, context, None),
             ')' => Token::new(Rparen, context, None),
-            '+' => Token::new(
-                Operator,
-                context,
-                Some(TokenContent::Operator(Plus)),
-            ),
+            '+' => Token::new(Operator, context, Some(TokenContent::Operator(Plus))),
             '-' => {
                 let mut is_unary_minus = false;
                 if let Some((_, next_c)) = input.peek() {
@@ -118,28 +156,12 @@ pub fn tokenize_line(
                     let content = parse_number(input.by_ref(), c, &context)?;
                     Token::new(TokenType::Number, context, Some(content))
                 } else {
-                    Token::new(
-                        Operator,
-                        context,
-                        Some(TokenContent::Operator(Minus)),
-                    )
+                    Token::new(Operator, context, Some(TokenContent::Operator(Minus)))
                 }
             }
-            '*' => Token::new(
-                Operator,
-                context,
-                Some(TokenContent::Operator(Mul)),
-            ),
-            '%' => Token::new(
-                Operator,
-                context,
-                Some(TokenContent::Operator(Modulo)),
-            ),
-            '^' => Token::new(
-                Operator,
-                context,
-                Some(TokenContent::Operator(Power)),
-            ),
+            '*' => Token::new(Operator, context, Some(TokenContent::Operator(Mul))),
+            '%' => Token::new(Operator, context, Some(TokenContent::Operator(Modulo))),
+            '^' => Token::new(Operator, context, Some(TokenContent::Operator(Power))),
             '>' => {
                 let content = if let Some((_, '=')) = input.peek() {
                     _ = input.next();
@@ -158,11 +180,7 @@ pub fn tokenize_line(
                 };
                 Token::new(Operator, context, Some(content))
             }
-            '=' => Token::new(
-                Operator,
-                context,
-                Some(TokenContent::Operator(Eq)),
-            ),
+            '=' => Token::new(Operator, context, Some(TokenContent::Operator(Eq))),
 
             '!' => {
                 let content = if let Some((_, '=')) = input.peek() {

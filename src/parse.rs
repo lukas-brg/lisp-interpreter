@@ -5,7 +5,29 @@ use crate::value::Value;
 
 struct ParserState {
     tokens: Vec<Token>,
-    current_token_idx: usize,
+    next_token_idx: usize,
+}
+impl ParserState {
+    pub fn new(tokens: Vec<Token>) -> ParserState {
+        ParserState {
+            tokens,
+            next_token_idx: 0,
+        }
+    }
+
+    pub fn peek(&self) -> Option<&Token> {
+        self.tokens.get(self.next_token_idx)
+    }
+
+    pub fn advance(&mut self) -> Option<&Token> {
+        let token = self.tokens.get(self.next_token_idx);
+        self.next_token_idx = std::cmp::min(self.tokens.len(), self.next_token_idx + 1);
+        token
+    }
+
+    pub fn has_next(&self) -> bool {
+        self.next_token_idx < self.tokens.len() - 1
+    }
 }
 
 fn number(token: &Token, parent: &mut AstNode) {
@@ -46,7 +68,6 @@ fn string(token: &Token, parent: &mut AstNode) {
 }
 
 fn expression(parser: &mut ParserState, parent: &mut AstNode) -> Result<(), ParsingError> {
-
     if let Some(token) = parser.peek() {
         if let Some(TokenContent::Operator(operator)) = token.content.clone() {
             let mut operator_node = AstNode::new(AstNodeValue::Operator(operator));
@@ -84,27 +105,4 @@ pub fn parse(tokens: Vec<Token>) -> Result<AstNode, ParsingError> {
     let mut root = AstNode::new(AstNodeValue::Root);
     _parse(&mut parser, &mut root)?;
     Ok(root)
-}
-
-impl ParserState {
-    pub fn new(tokens: Vec<Token>) -> ParserState {
-        ParserState {
-            tokens,
-            current_token_idx: 0,
-        }
-    }
-
-    pub fn peek(&self) -> Option<&Token> {
-        self.tokens.get(self.current_token_idx)
-    }
-
-    pub fn advance(&mut self) -> Option<&Token> {
-        let token = self.tokens.get(self.current_token_idx);
-        self.current_token_idx = std::cmp::min(self.tokens.len(), self.current_token_idx + 1);
-        token
-    }
-
-    pub fn has_next(&self) -> bool {
-        self.current_token_idx < self.tokens.len() - 1
-    }
 }

@@ -7,3 +7,7 @@ pub struct BuiltinFunction {
     pub min_args: usize,
     pub max_args: Option<usize>,
 }
+
+trait BuiltinFunctionT {
+    fn eval(args: &[Value]) -> Result<Value, RuntimeError>;
+}
