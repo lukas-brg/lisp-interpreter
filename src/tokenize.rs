@@ -161,20 +161,12 @@ pub fn tokenize_line(
                 };
                 Token::new(TokenType::Operator, context, Some(content))
             }
-            '=' => {
-                let content = if let Some((_, '=')) = input.peek() {
-                    _ = input.next();
-                    TokenContent::Operator(Eq)
-                } else {
-                    return Err(TokenizingError::new(
-                        line_num,
-                        index,
-                        index,
-                        std::format!("Unrecognized Token '{c}'").as_str(),
-                    ));
-                };
-                Token::new(TokenType::Operator, context, Some(content))
-            }
+            '=' => Token::new(
+                TokenType::Operator,
+                context,
+                Some(TokenContent::Operator(Eq)),
+            ),
+
             '!' => {
                 let content = if let Some((_, '=')) = input.peek() {
                     _ = input.next();

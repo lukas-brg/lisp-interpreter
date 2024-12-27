@@ -1,3 +1,4 @@
+use crate::errors::RuntimeError;
 use std::ops::{Add, Div, Mul, Sub};
 
 #[derive(Debug, Clone)]
@@ -19,6 +20,14 @@ impl Value {
 
     pub fn is_numeric(&self) -> bool {
         matches!(self, Value::Int(_) | Value::Float(_))
+    }
+
+    pub fn get_numeric_value_as_float(&self) -> Option<f64> {
+        match *self {
+            Value::Int(v) => Some((v as f64)),
+            Value::Float(v) => Some(v),
+            _ => None,
+        }
     }
 
     pub fn int_div_assign(&mut self, rhs: Value) {
@@ -57,6 +66,26 @@ impl Value {
             Value::Int(v) => *v *= (-1),
             _ => unreachable!(),
         }
+    }
+
+    pub fn compare_to(&self, rhs: &Self) -> Result<i64, RuntimeError> {
+        if !(self.is_numeric() && rhs.is_numeric()) {
+            let msg = format!(
+                "Incompatible Types for comparision: {:?} and {:?}",
+                self, rhs
+            );
+            return Err(RuntimeError::new(msg.to_string()));
+        }
+
+        let l = self.get_numeric_value_as_float().unwrap();
+        let r = rhs.get_numeric_value_as_float().unwrap();
+        let cmp = l - r;
+        if cmp < 0.0 {
+            return Ok(-1);
+        } else if cmp > 0.0 {
+            return Ok(1);
+        }
+        Ok(0)
     }
 }
 

@@ -15,6 +15,11 @@ pub struct RuntimeError {
     pub message: String,
 }
 
+impl RuntimeError {
+    pub fn new(msg: String) -> RuntimeError {
+        RuntimeError { message: msg }
+    }
+}
 #[derive(Debug)]
 pub enum EvalError {
     TokenizingError(TokenizingError),
