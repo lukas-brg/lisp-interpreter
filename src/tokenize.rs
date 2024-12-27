@@ -1,4 +1,3 @@
-use std::str::CharIndices;
 
 use crate::errors::TokenizingError;
 use crate::operatortype::Operator::{
@@ -103,7 +102,7 @@ pub fn tokenize_line(
             '(' => Token::new(Lparen, context, None),
             ')' => Token::new(Rparen, context, None),
             '+' => Token::new(
-                TokenType::Operator,
+                Operator,
                 context,
                 Some(TokenContent::Operator(Plus)),
             ),
@@ -115,31 +114,29 @@ pub fn tokenize_line(
                     }
                 };
 
-                let token = if is_unary_minus {
+                if is_unary_minus {
                     let content = parse_number(input.by_ref(), c, &context)?;
                     Token::new(TokenType::Number, context, Some(content))
                 } else {
                     Token::new(
-                        TokenType::Operator,
+                        Operator,
                         context,
                         Some(TokenContent::Operator(Minus)),
                     )
-                };
-
-                token
+                }
             }
             '*' => Token::new(
-                TokenType::Operator,
+                Operator,
                 context,
                 Some(TokenContent::Operator(Mul)),
             ),
             '%' => Token::new(
-                TokenType::Operator,
+                Operator,
                 context,
                 Some(TokenContent::Operator(Modulo)),
             ),
             '^' => Token::new(
-                TokenType::Operator,
+                Operator,
                 context,
                 Some(TokenContent::Operator(Power)),
             ),
@@ -150,7 +147,7 @@ pub fn tokenize_line(
                 } else {
                     TokenContent::Operator(Gt)
                 };
-                Token::new(TokenType::Operator, context, Some(content))
+                Token::new(Operator, context, Some(content))
             }
             '<' => {
                 let content = if let Some((_, '=')) = input.peek() {
@@ -159,17 +156,17 @@ pub fn tokenize_line(
                 } else {
                     TokenContent::Operator(Lt)
                 };
-                Token::new(TokenType::Operator, context, Some(content))
+                Token::new(Operator, context, Some(content))
             }
             '=' => Token::new(
-                TokenType::Operator,
+                Operator,
                 context,
                 Some(TokenContent::Operator(Eq)),
             ),
 
             '!' => {
                 let content = if let Some((_, '=')) = input.peek() {
-                    _ = input.next();
+                    let _ = input.next();
                     TokenContent::Operator(Neq)
                 } else {
                     return Err(TokenizingError::new(
@@ -179,23 +176,24 @@ pub fn tokenize_line(
                         std::format!("Unrecognized Token '{c}'").as_str(),
                     ));
                 };
-                Token::new(TokenType::Operator, context, Some(content))
+                Token::new(Operator, context, Some(content))
             }
             '/' => {
                 let content = if let Some((_, '/')) = input.peek() {
-                    input.next();
+                    let _ = input.next();
                     TokenContent::Operator(IntDiv)
                 } else {
                     TokenContent::Operator(Div)
                 };
 
-                Token::new(TokenType::Operator, context, Some(content))
+                Token::new(Operator, context, Some(content))
             }
 
             '"' => {
                 let content = Some(parse_string(input.by_ref(), &context)?);
                 Token::new(TokenType::String, context, content)
             }
+            '\'' => Token::new(TokenType::Quote, context, None),
             _ => {
                 if c.is_alphabetic() {
                     let mut identifier = String::from(c);

@@ -8,6 +8,7 @@ pub enum TokenType {
     Number,
     Identifier,
     String,
+    Quote,
 }
 
 #[derive(Debug, Clone)]

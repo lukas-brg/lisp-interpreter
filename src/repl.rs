@@ -1,11 +1,9 @@
-use crate::errors::EvalError;
 use crate::eval::eval;
 
 use rustyline::error::ReadlineError;
 use rustyline::KeyPress;
-use rustyline::{Cmd, CompletionType, Config, EditMode, Editor};
+use rustyline::{Cmd, Editor};
 
-use std::io::{self, Write};
 
 fn is_complete_expression(input: &str) -> bool {
     let open = input.matches('(').count();
@@ -45,12 +43,12 @@ pub fn run_repl() {
                 }
 
                 if is_complete_expression(&buffer) {
+                    rl.add_history_entry(&buffer);
                     buffer = if !(buffer.starts_with('(') && buffer.ends_with(')')) {
                         format!("({})", buffer)
                     } else {
                         buffer
                     };
-                    rl.add_history_entry(&buffer);
 
                     if let Err(err) = eval(&buffer) {
                         eprintln!("Error: {}", err.message());

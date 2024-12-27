@@ -1,38 +1,11 @@
 use crate::ast::{AstNode, AstNodeValue};
 use crate::errors::ParsingError;
-use crate::operatortype::Operator;
-use crate::operatortype::Operator::{Div, Minus, Mul, Plus};
-use crate::token::{Token, TokenContent, TokenContext, TokenType};
+use crate::token::{Token, TokenContent, TokenType};
 use crate::value::Value;
 
 struct ParserState {
     tokens: Vec<Token>,
     current_token_idx: usize,
-}
-
-fn expression(parser: &mut ParserState, parent: &mut AstNode) -> Result<(), ParsingError> {
-    if let Some(token) = parser.advance() {
-        if let Some(TokenContent::Operator(operator)) = token.content.clone() {
-            let mut operator_node = AstNode::new(AstNodeValue::Operator(operator));
-            _parse(parser, &mut operator_node)?;
-            parent.add_child(operator_node);
-        } else {
-            _parse(parser, parent);
-            // let err = ParsingError::new(
-            //     Some(token.clone()),
-            //     format!(
-            //         "Expected an operation after '(', found {:?}",
-            //         token.token_type
-            //     )
-            //     .as_str(),
-            // );
-            // return Err(err);
-        }
-    } else {
-        let err = ParsingError::new(None, "Expected token after '(' found EOF");
-        return Err(err);
-    }
-    Ok(())
 }
 
 fn number(token: &Token, parent: &mut AstNode) {
@@ -72,6 +45,24 @@ fn string(token: &Token, parent: &mut AstNode) {
     }
 }
 
+fn expression(parser: &mut ParserState, parent: &mut AstNode) -> Result<(), ParsingError> {
+
+    if let Some(token) = parser.peek() {
+        if let Some(TokenContent::Operator(operator)) = token.content.clone() {
+            let mut operator_node = AstNode::new(AstNodeValue::Operator(operator));
+            let _ = parser.advance();
+            _parse(parser, &mut operator_node)?;
+            parent.add_child(operator_node);
+        } else {
+            _parse(parser, parent)?;
+        }
+    } else {
+        let err = ParsingError::new(None, "Expected token after '(' found EOF");
+        return Err(err);
+    }
+    Ok(())
+}
+
 fn _parse(parser: &mut ParserState, parent: &mut AstNode) -> Result<(), ParsingError> {
     while let Some(token) = parser.advance() {
         match token.token_type {
@@ -80,6 +71,7 @@ fn _parse(parser: &mut ParserState, parent: &mut AstNode) -> Result<(), ParsingE
             TokenType::Number => number(token, parent),
             TokenType::Identifier => identifier(token, parent),
             TokenType::String => string(token, parent),
+            TokenType::Quote => {}
             _ => {}
         };
     }
@@ -103,7 +95,7 @@ impl ParserState {
     }
 
     pub fn peek(&self) -> Option<&Token> {
-        self.tokens.get(self.current_token_idx + 1)
+        self.tokens.get(self.current_token_idx)
     }
 
     pub fn advance(&mut self) -> Option<&Token> {

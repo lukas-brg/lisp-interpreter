@@ -1,9 +1,8 @@
 use itertools::Itertools;
 
-use crate::ast;
 use crate::ast::AstNode;
 use crate::ast::AstNodeValue;
-use crate::errors::{EvalError, ParsingError, RuntimeError, TokenizingError};
+use crate::errors::{EvalError, RuntimeError};
 use crate::operatortype::Operator;
 use crate::parse::parse;
 use crate::tokenize::tokenize;
@@ -14,7 +13,7 @@ fn eval_plus(node: &AstNode) -> Result<Value, RuntimeError> {
     for child in node.children() {
         value += eval_tree(child)?;
     }
-    return Ok(value);
+    Ok(value)
 }
 
 fn eval_minus(node: &AstNode) -> Result<Value, RuntimeError> {
@@ -24,9 +23,9 @@ fn eval_minus(node: &AstNode) -> Result<Value, RuntimeError> {
         return Ok(value);
     }
     for child in node.children().iter().skip(1) {
-        value -= (eval_tree(child)?);
+        value -= eval_tree(child)?;
     }
-    return Ok(value);
+    Ok(value)
 }
 
 fn eval_mul(node: &AstNode) -> Result<Value, RuntimeError> {
@@ -34,7 +33,7 @@ fn eval_mul(node: &AstNode) -> Result<Value, RuntimeError> {
     for child in node.children() {
         value *= eval_tree(child)?;
     }
-    return Ok(value);
+    Ok(value)
 }
 
 fn eval_modulo(node: &AstNode) -> Result<Value, RuntimeError> {
@@ -42,7 +41,7 @@ fn eval_modulo(node: &AstNode) -> Result<Value, RuntimeError> {
     for child in node.children().iter().skip(1) {
         value %= eval_tree(child)?;
     }
-    return Ok(value);
+    Ok(value)
 }
 
 fn eval_div(node: &AstNode) -> Result<Value, RuntimeError> {
@@ -50,7 +49,7 @@ fn eval_div(node: &AstNode) -> Result<Value, RuntimeError> {
     for child in node.children().iter().skip(1) {
         value /= eval_tree(child)?;
     }
-    return Ok(value);
+    Ok(value)
 }
 
 fn eval_intdiv(node: &AstNode) -> Result<Value, RuntimeError> {
@@ -58,7 +57,7 @@ fn eval_intdiv(node: &AstNode) -> Result<Value, RuntimeError> {
     for child in node.children().iter().skip(1) {
         value.int_div_assign(eval_tree(child)?);
     }
-    return Ok(value);
+    Ok(value)
 }
 
 fn eval_pow(node: &AstNode) -> Result<Value, RuntimeError> {
@@ -66,37 +65,37 @@ fn eval_pow(node: &AstNode) -> Result<Value, RuntimeError> {
     for child in node.children().iter().skip(1) {
         value.pow_assign(eval_tree(child)?);
     }
-    return Ok(value);
+    Ok(value)
 }
 
 fn eval_eq(node: &AstNode) -> Result<Value, RuntimeError> {
-    let mut value = eval_tree(node.children().get(0).unwrap())?;
+    let value = eval_tree(node.children().get(0).unwrap())?;
     for child in node.children().iter().skip(1) {
         if eval_tree(child)? != value {
             return Ok(Value::Boolean(false));
         }
     }
-    return Ok(Value::Boolean(true));
+    Ok(Value::Boolean(true))
 }
 
 fn eval_lt(node: &AstNode) -> Result<Value, RuntimeError> {
-    for (a, b) in node.children().iter().tuple_windows() {
-        let (left, right) = (eval_tree(a)?, eval_tree(b)?);
-        if left.compare_to(&right)? > 0 {
-            return Ok(Value::Boolean(false));
-        }
-    }
-    return Ok(Value::Boolean(true));
-}
-
-fn eval_leq(node: &AstNode) -> Result<Value, RuntimeError> {
     for (a, b) in node.children().iter().tuple_windows() {
         let (left, right) = (eval_tree(a)?, eval_tree(b)?);
         if left.compare_to(&right)? >= 0 {
             return Ok(Value::Boolean(false));
         }
     }
-    return Ok(Value::Boolean(true));
+    Ok(Value::Boolean(true))
+}
+
+fn eval_leq(node: &AstNode) -> Result<Value, RuntimeError> {
+    for (a, b) in node.children().iter().tuple_windows() {
+        let (left, right) = (eval_tree(a)?, eval_tree(b)?);
+        if left.compare_to(&right)? > 0 {
+            return Ok(Value::Boolean(false));
+        }
+    }
+    Ok(Value::Boolean(true))
 }
 
 fn eval_gt(node: &AstNode) -> Result<Value, RuntimeError> {
@@ -106,7 +105,7 @@ fn eval_gt(node: &AstNode) -> Result<Value, RuntimeError> {
             return Ok(Value::Boolean(false));
         }
     }
-    return Ok(Value::Boolean(true));
+    Ok(Value::Boolean(true))
 }
 
 fn eval_geq(node: &AstNode) -> Result<Value, RuntimeError> {
@@ -116,7 +115,7 @@ fn eval_geq(node: &AstNode) -> Result<Value, RuntimeError> {
             return Ok(Value::Boolean(false));
         }
     }
-    return Ok(Value::Boolean(true));
+    Ok(Value::Boolean(true))
 }
 
 fn eval_neq(node: &AstNode) -> Result<Value, RuntimeError> {
@@ -131,7 +130,7 @@ fn eval_neq(node: &AstNode) -> Result<Value, RuntimeError> {
             return Ok(Value::Boolean(false));
         }
     }
-    return Ok(Value::Boolean(true));
+    Ok(Value::Boolean(true))
 }
 
 fn eval_operator(node: &AstNode, op: &Operator) -> Result<Value, RuntimeError> {
@@ -168,7 +167,7 @@ pub fn eval(input: &str) -> Result<(), EvalError> {
     let tokens = match tokenize(input) {
         Ok(tokens) => tokens,
         Err(e) => {
-            return Err(EvalError::TokenizingError(e));
+            return Err(EvalError::Tokenizing(e));
         }
     };
     // println!("\nTokenize result:\n{:?}", tokens);
@@ -176,13 +175,13 @@ pub fn eval(input: &str) -> Result<(), EvalError> {
     let root = match parse(tokens) {
         Ok(root) => root,
         Err(e) => {
-            return Err(EvalError::ParsingError(e));
+            return Err(EvalError::Parsing(e));
         }
     };
     // println!("\nParse result:\n{}", root);
-    let v = match eval_tree(&root.children().get(0).unwrap()) {
+    let v = match eval_tree(root.children().get(0).unwrap()) {
         Ok(v) => v,
-        Err(e) => return Err(EvalError::RuntimeError(e)),
+        Err(e) => return Err(EvalError::Runtime(e)),
     };
     println!("{}", v);
     Ok(())

@@ -1,5 +1,5 @@
 use crate::errors::RuntimeError;
-use std::ops::{Add, Div, Mul, Sub};
+use std::ops::{Add, Mul};
 
 #[derive(Debug, Clone)]
 pub enum Value {
@@ -7,6 +7,7 @@ pub enum Value {
     Float(f64),
     Boolean(bool),
     String(String),
+    List(Vec<Value>),
     None,
 }
 
@@ -24,7 +25,7 @@ impl Value {
 
     pub fn get_numeric_value_as_float(&self) -> Option<f64> {
         match *self {
-            Value::Int(v) => Some((v as f64)),
+            Value::Int(v) => Some(v as f64),
             Value::Float(v) => Some(v),
             _ => None,
         }
@@ -62,8 +63,8 @@ impl Value {
     pub fn negate(&mut self) {
         match self {
             Value::Boolean(v) => *v = !(*v),
-            Value::Float(v) => *v *= (-1.0),
-            Value::Int(v) => *v *= (-1),
+            Value::Float(v) => *v *= -1.0,
+            Value::Int(v) => *v *= -1,
             _ => unreachable!(),
         }
     }
@@ -74,7 +75,7 @@ impl Value {
                 "Incompatible Types for comparision: {:?} and {:?}",
                 self, rhs
             );
-            return Err(RuntimeError::new(msg.to_string()));
+            return Err(RuntimeError::new(msg));
         }
 
         let l = self.get_numeric_value_as_float().unwrap();
@@ -236,6 +237,7 @@ impl std::fmt::Display for Value {
             Value::Boolean(v) => write!(f, "{}", v),
             Value::String(v) => write!(f, "\"{}\"", v),
             Value::None => write!(f, "null"),
+            other => write!(f, "{:?}", other),
         }
     }
 }

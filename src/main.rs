@@ -1,6 +1,5 @@
-use crate::eval::eval;
-
 mod ast;
+mod builtin;
 mod env;
 mod errors;
 mod eval;

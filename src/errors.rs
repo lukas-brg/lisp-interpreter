@@ -22,16 +22,16 @@ impl RuntimeError {
 }
 #[derive(Debug)]
 pub enum EvalError {
-    TokenizingError(TokenizingError),
-    ParsingError(ParsingError),
-    RuntimeError(RuntimeError),
+    Tokenizing(TokenizingError),
+    Parsing(ParsingError),
+    Runtime(RuntimeError),
 }
 impl EvalError {
     pub fn message(&self) -> &str {
         match self {
-            EvalError::TokenizingError(err) => &err.message,
-            EvalError::ParsingError(err) => &err.message,
-            EvalError::RuntimeError(err) => &err.message,
+            EvalError::Tokenizing(err) => &err.message,
+            EvalError::Parsing(err) => &err.message,
+            EvalError::Runtime(err) => &err.message,
         }
     }
 }
