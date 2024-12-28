@@ -85,18 +85,31 @@ fn expression(parser: &mut ParserState, parent: &mut AstNode) -> Result<(), Pars
     Ok(())
 }
 
-fn list(parser: &mut ParserState, parent: &mut AstNode, token: Token) -> Result<(), ParsingError> {
+fn quoted_expression(
+    parser: &mut ParserState,
+    parent: &mut AstNode,
+    token: Token,
+) -> Result<(), ParsingError> {
     if let None = parser.peek() {
         return Err(ParsingError::new(Some(token), "Expected token after '"));
     }
-    let next = parser.advance().unwrap();
 
-    if let TokenType::Lparen = next.token_type {
-    } else {
-        return Err(ParsingError::new(
-            Some(token),
-            format!("Expected '(' after ' , found {:?}", next).as_str(),
-        ));
+    match parser.peek() {
+        Some(next_tok) => match next_tok.token_type {
+            TokenType::Lparen => {}
+            _ => {
+                return Err(ParsingError::new(
+                    Some(next_tok.clone()),
+                    format!("Expected '(' after ' , found {:?}", next_tok).as_str(),
+                ))
+            }
+        },
+        None => {
+            return Err(ParsingError::new(
+                Some(token.clone()),
+                "Expected token after '",
+            ))
+        }
     }
     let mut node = AstNode::new(AstNodeValue::Quote);
 
@@ -116,9 +129,8 @@ fn _parse(parser: &mut ParserState, parent: &mut AstNode) -> Result<(), ParsingE
             TokenType::String => string(token, parent),
             TokenType::Quote => {
                 let token_copy = token.clone();
-                list(parser, parent, token_copy)?;
+                quoted_expression(parser, parent, token_copy)?;
             }
-
             _ => {}
         };
     }
