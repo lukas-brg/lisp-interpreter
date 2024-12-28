@@ -99,7 +99,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "lisp-interpreter"
+name = "lisp_interpreter"
 version = "0.1.0"
 dependencies = [
  "itertools",

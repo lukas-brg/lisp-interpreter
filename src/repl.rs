@@ -1,4 +1,4 @@
-use crate::eval::eval;
+use lisp_interpreter::eval::eval;
 
 use rustyline::error::ReadlineError;
 use rustyline::KeyPress;
