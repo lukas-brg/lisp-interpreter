@@ -44,16 +44,23 @@ fn number(token: &Token, parent: &mut AstNode) {
     parent.add_child(node);
 }
 
-fn identifier(token: &Token, parent: &mut AstNode) {
+fn identifier(
+    parser: &mut ParserState,
+    parent: &mut AstNode,
+    token: Token,
+) -> Result<(), ParsingError> {
     let content = token.content.clone().unwrap();
 
     if let TokenContent::String(v) = content {
+        // By default, everything following an identifier, will be the identifier's child
         let ast_value = AstNodeValue::Identifier(v);
-        let node = AstNode::new(ast_value);
+        let mut node = AstNode::new(ast_value);
+        _parse(parser, &mut node)?;
         parent.add_child(node);
     } else {
         unreachable!();
     }
+    Ok(())
 }
 
 fn string(token: &Token, parent: &mut AstNode) {
@@ -125,7 +132,10 @@ fn _parse(parser: &mut ParserState, parent: &mut AstNode) -> Result<(), ParsingE
             TokenType::Rparen => return Ok(()),
             TokenType::Lparen => expression(parser, parent)?,
             TokenType::Number => number(token, parent),
-            TokenType::Identifier => identifier(token, parent),
+            TokenType::Identifier => {
+                let token_copy = token.clone();
+                identifier(parser, parent, token_copy)?;
+            }
             TokenType::String => string(token, parent),
             TokenType::Quote => {
                 let token_copy = token.clone();

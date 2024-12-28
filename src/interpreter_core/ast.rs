@@ -32,6 +32,10 @@ impl AstNode {
     pub fn children(&self) -> &Vec<AstNode> {
         &self.children
     }
+
+    pub fn append_children(&mut self, nodes: Vec<AstNode>) {
+        self.children.extend(nodes);
+    }
 }
 
 impl fmt::Display for AstNode {
