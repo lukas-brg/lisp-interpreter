@@ -162,7 +162,7 @@ fn eval_tree(node: &AstNode) -> Result<Value, RuntimeError> {
     }
 }
 
-pub fn eval(input: &str) -> Result<(), EvalError> {
+pub fn eval(input: &str) -> Result<Value, EvalError> {
     let tokens = match tokenize(input) {
         Ok(tokens) => tokens,
         Err(e) => {
@@ -178,10 +178,106 @@ pub fn eval(input: &str) -> Result<(), EvalError> {
         }
     };
     // println!("\nParse result:\n{}", root);
-    let v = match eval_tree(root.children().get(0).unwrap()) {
+    let result = match eval_tree(root.children().get(0).unwrap()) {
         Ok(v) => v,
         Err(e) => return Err(EvalError::Runtime(e)),
     };
-    println!("{}", v);
-    Ok(())
+    Ok(result)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_operators() {
+        let res = eval("(1)").unwrap();
+        assert_eq!(res, Value::Int(1));
+
+        let res = eval("(-1)").unwrap();
+        assert_eq!(res, Value::Int(-1));
+
+        let res = eval("(- 1)").unwrap();
+        assert_eq!(res, Value::Int(-1));
+
+        let res = eval("(+ 1 0)").unwrap();
+        assert_eq!(res, Value::Int(1));
+
+        let res = eval("(+ 1 1)").unwrap();
+        assert_eq!(res, Value::Int(2));
+
+        let res = eval("(+ 1 -2)").unwrap();
+        assert_eq!(res, Value::Int(-1));
+
+        let res = eval("(+ 2.5 2.5)").unwrap();
+        assert_eq!(res, Value::Int(5));
+        let res = eval("(+ 2.5 2.6)").unwrap();
+        assert_eq!(res, Value::Float(5.1));
+
+        let res = eval("(/ 4 2)").unwrap();
+        assert_eq!(res, Value::Int(2));
+        let res = eval("(/ 5 2)").unwrap();
+        assert_eq!(res, Value::Float(2.5));
+        let res = eval("(/ 0 2)").unwrap();
+        assert_eq!(res, Value::Int(0));
+        let res = eval("(/ 5 -2)").unwrap();
+        assert_eq!(res, Value::Float(-2.5));
+        let res = eval("(/ -5 -2)").unwrap();
+        assert_eq!(res, Value::Float(2.5));
+        let res = eval("(// 5 2)").unwrap();
+        assert_eq!(res, Value::Int(2));
+        let res = eval("(% 5 2)").unwrap();
+        assert_eq!(res, Value::Int(1));
+
+        let res = eval("(% -2 24)").unwrap();
+        assert_eq!(res, Value::Int(22));
+
+        let res = eval("(* 2 3)").unwrap();
+        assert_eq!(res, Value::Int(6));
+        let res = eval("(* 2 2.5)").unwrap();
+        assert_eq!(res, Value::Int(5));
+        let res = eval("(* 2 2.1)").unwrap();
+        assert_eq!(res, Value::Float(4.2));
+
+        let res = eval("(^ 2 3)").unwrap();
+        assert_eq!(res, Value::Int(8));
+        let res = eval("(^ 2 -1)").unwrap();
+        assert_eq!(res, Value::Float(0.5));
+        let res = eval("(^ 16 (/ 1 2))").unwrap();
+        assert_eq!(res, Value::Int(4));
+
+        let res = eval("(+ (* 2 (- 10 3)) (/ (+ 15 5) (- 8 4)))").unwrap();
+        assert_eq!(res, Value::Int(19));
+
+        let res = eval("(= 5 5 5 5)").unwrap();
+        assert_eq!(res, Value::Boolean(true));
+        let res = eval("(= 5 5 1 5)").unwrap();
+        assert_eq!(res, Value::Boolean(false));
+        let res = eval("(!= 5 5 1 5)").unwrap();
+        assert_eq!(res, Value::Boolean(false));
+        let res = eval("(!= 1 2 3 4 1)").unwrap();
+        assert_eq!(res, Value::Boolean(false));
+        let res = eval("(!= 1 2 3 4 5)").unwrap();
+        assert_eq!(res, Value::Boolean(true));
+
+        let res = eval("(< 1 2 3 4 5)").unwrap();
+        assert_eq!(res, Value::Boolean(true));
+        let res = eval("(< 1 2 3 3 5)").unwrap();
+        assert_eq!(res, Value::Boolean(false));
+        let res = eval("(<= 1 2 3 3 5)").unwrap();
+        assert_eq!(res, Value::Boolean(true));
+        let res = eval("(<= 1 2 3 3 5 -99)").unwrap();
+        assert_eq!(res, Value::Boolean(false));
+        let res = eval("(< -5 -3 0 2 6)").unwrap();
+        assert_eq!(res, Value::Boolean(true));
+
+        let res = eval("(> 1 2 3 3 5)").unwrap();
+        assert_eq!(res, Value::Boolean(false));
+        let res = eval("(> 1 0 -1 -5)").unwrap();
+        assert_eq!(res, Value::Boolean(true));
+        let res = eval("(> 1 0 0 -5)").unwrap();
+        assert_eq!(res, Value::Boolean(false));
+        let res = eval("(>= 1 0 0 -5)").unwrap();
+        assert_eq!(res, Value::Boolean(true));
+    }
 }

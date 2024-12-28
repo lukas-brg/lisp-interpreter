@@ -20,10 +20,12 @@ where
     let mut base = NumBase::Dec;
     let mut num_str = String::new();
     let mut sign = 1;
+    let mut contains_sign = false;
 
     let digit_after_sign = if first_char == '-' {
         let (_, c) = input.next().unwrap();
         sign = -1;
+        contains_sign = true;
         c
     } else {
         first_char
@@ -52,9 +54,22 @@ where
             }
         }
     }
+    let mut end_idx = context.column_number;
     while let Some(&(i, c)) = input.peek() {
-        if !base.is_valid_digit(c) && c != '.' {
+        if !base.is_valid_digit(c) && c != '.' && c != '-' {
             break;
+        }
+        end_idx = i;
+        if c == '-' {
+            if contains_sign {
+                return Err(TokenizingError::new(
+                    context.line_number,
+                    context.column_number,
+                    i,
+                    "Invalid number: multiple minus signs found",
+                ));
+            }
+            contains_sign = true;
         }
         if c == '.' {
             if float {
@@ -70,7 +85,7 @@ where
                     context.line_number,
                     context.column_number,
                     i,
-                    "Floats are only supported for decimal numbers",
+                    "Floats only support decimal numbers",
                 ));
             }
             float = true;
@@ -80,11 +95,29 @@ where
     }
 
     let content = if float {
-        let parsed_float: f64 = num_str.parse().expect("Failed to parse float");
-        TokenContent::Float(sign as f64 * parsed_float)
+        match base.parse_float(&num_str) {
+            Ok(parsed_float) => TokenContent::Float(sign as f64 * parsed_float),
+            Err(_) => {
+                return Err(TokenizingError::new(
+                    context.line_number,
+                    context.column_number,
+                    end_idx,
+                    format!("'{}' cannot be parsed as float", num_str).as_str(),
+                ))
+            }
+        }
     } else {
-        let parsed_int: i64 = base.parse_int(num_str).unwrap();
-        TokenContent::Int(sign * parsed_int)
+        match base.parse_int(&num_str) {
+            Ok(parsed_int) => TokenContent::Int(sign * parsed_int),
+            Err(_) => {
+                return Err(TokenizingError::new(
+                    context.line_number,
+                    context.column_number,
+                    end_idx,
+                    format!("'{}' cannot be parsed as int", num_str).as_str(),
+                ))
+            }
+        }
     };
 
     Ok(content)

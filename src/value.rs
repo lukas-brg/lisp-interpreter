@@ -18,12 +18,19 @@ impl NumBase {
         }
     }
 
-    pub fn parse_int(self, num_str: String) -> Result<i64, std::num::ParseIntError> {
+    pub fn parse_int(self, num_str: &String) -> Result<i64, std::num::ParseIntError> {
         match self {
             NumBase::Dec => num_str.parse(),
             NumBase::Bin => i64::from_str_radix(&num_str.trim_start_matches("0b"), 2),
             NumBase::Oct => i64::from_str_radix(&num_str.trim_start_matches("0o"), 8),
             NumBase::Hex => i64::from_str_radix(&num_str.trim_start_matches("0x"), 16),
+        }
+    }
+
+    pub fn parse_float(self, num_str: &String) -> Result<f64, std::num::ParseFloatError> {
+        match self {
+            NumBase::Dec => num_str.parse(),
+            _ => unimplemented!(),
         }
     }
 }
@@ -149,7 +156,11 @@ impl std::ops::AddAssign for Value {
             _ => unreachable!(),
         };
 
-        *self = Value::Float(result);
+        if result.fract() == 0.0 {
+            *self = Value::Int(result as i64);
+        } else {
+            *self = Value::Float(result);
+        }
     }
 }
 
@@ -169,7 +180,11 @@ impl std::ops::SubAssign for Value {
             _ => unreachable!(),
         };
 
-        *self = Value::Float(result);
+        if result.fract() == 0.0 {
+            *self = Value::Int(result as i64);
+        } else {
+            *self = Value::Float(result);
+        }
     }
 }
 
@@ -189,7 +204,11 @@ impl std::ops::MulAssign for Value {
             _ => unreachable!(),
         };
 
-        *self = Value::Float(result);
+        if result.fract() == 0.0 {
+            *self = Value::Int(result as i64);
+        } else {
+            *self = Value::Float(result);
+        }
     }
 }
 

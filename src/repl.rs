@@ -49,8 +49,9 @@ pub fn run_repl() {
                         buffer
                     };
 
-                    if let Err(err) = eval(&buffer) {
-                        eprintln!("Error: {}", err.message());
+                    match eval(&buffer) {
+                        Ok(result) => println!("{}", result),
+                        Err(err) => eprintln!("Error: {}", err.message()),
                     }
 
                     buffer.clear();
