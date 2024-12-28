@@ -157,7 +157,7 @@ fn eval_tree(node: &AstNode) -> Result<Value, RuntimeError> {
         AstNodeValue::Operator(op) => eval_operator(node, op),
         AstNodeValue::Literal(v) => Ok(v.clone()),
         _ => {
-            unimplemented!("Not implemented  {}", node);
+            unimplemented!("Not implemented\n{}", node);
         }
     }
 }
@@ -177,7 +177,7 @@ pub fn eval(input: &str) -> Result<Value, EvalError> {
             return Err(EvalError::Parsing(e));
         }
     };
-    // println!("\nParse result:\n{}", root);
+    println!("\nParse result:\n{}", root);
     let result = match eval_tree(root.children().get(0).unwrap()) {
         Ok(v) => v,
         Err(e) => return Err(EvalError::Runtime(e)),

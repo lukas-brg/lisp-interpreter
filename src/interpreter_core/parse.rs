@@ -85,6 +85,27 @@ fn expression(parser: &mut ParserState, parent: &mut AstNode) -> Result<(), Pars
     Ok(())
 }
 
+fn list(parser: &mut ParserState, parent: &mut AstNode, token: Token) -> Result<(), ParsingError> {
+    if let None = parser.peek() {
+        return Err(ParsingError::new(Some(token), "Expected token after '"));
+    }
+    let next = parser.advance().unwrap();
+
+    if let TokenType::Lparen = next.token_type {
+    } else {
+        return Err(ParsingError::new(
+            Some(token),
+            format!("Expected '(' after ' , found {:?}", next).as_str(),
+        ));
+    }
+    let mut node = AstNode::new(AstNodeValue::Quote);
+
+    _parse(parser, &mut node)?;
+    parent.add_child(node);
+
+    Ok(())
+}
+
 fn _parse(parser: &mut ParserState, parent: &mut AstNode) -> Result<(), ParsingError> {
     while let Some(token) = parser.advance() {
         match token.token_type {
@@ -93,7 +114,11 @@ fn _parse(parser: &mut ParserState, parent: &mut AstNode) -> Result<(), ParsingE
             TokenType::Number => number(token, parent),
             TokenType::Identifier => identifier(token, parent),
             TokenType::String => string(token, parent),
-            TokenType::Quote => {}
+            TokenType::Quote => {
+                let token_copy = token.clone();
+                list(parser, parent, token_copy)?;
+            }
+
             _ => {}
         };
     }

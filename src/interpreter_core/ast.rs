@@ -7,6 +7,7 @@ pub enum AstNodeValue {
     Operator(Operator),
     Literal(Value),
     Identifier(String),
+    Quote,
     Root,
 }
 
