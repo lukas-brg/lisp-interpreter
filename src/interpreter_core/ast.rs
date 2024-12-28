@@ -9,6 +9,7 @@ pub enum AstNodeValue {
     Identifier(String),
     Quote,
     Root,
+    Values,
 }
 
 #[derive(Debug, Clone)]
@@ -30,6 +31,9 @@ impl AstNode {
     }
 
     pub fn children(&self) -> &Vec<AstNode> {
+        if let AstNodeValue::Values = self.value {
+            return &self.children.get(0).unwrap().children();
+        }
         &self.children
     }
 

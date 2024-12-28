@@ -162,28 +162,34 @@ fn eval_identifier(
     identifier: &String,
     env: &mut Environment,
 ) -> Result<AstNode, RuntimeError> {
-    let mut flattened_subtree = AstNode::new(node.value.clone());
+    let mut new_node = node.clone();
     if let Some(val) = env.get_var(identifier) {
+        let mut flattened_subtree = AstNode::new(AstNodeValue::Values);
+        flattened_subtree.add_child(AstNode::new(AstNodeValue::Literal(val.clone())));
         flattened_subtree.append_children(node.children().clone());
+        println!("{}", flattened_subtree);
+        return Ok(flattened_subtree);
     }
 
     match identifier.as_str() {
         "defvar" => {}
         _ => unimplemented!(),
     }
-    Ok(flattened_subtree)
+    Ok(new_node)
 }
 
 fn eval_tree(node: &AstNode, env: &mut Environment) -> Result<Value, RuntimeError> {
-    match &node.value {
-        AstNodeValue::Operator(op) => eval_operator(node, op, env),
-        AstNodeValue::Literal(v) => Ok(v.clone()),
-        AstNodeValue::Identifier(v) => {
-            let mut n = eval_identifier(node, v, env)?;
-            return eval_tree(&n, env);
-        }
-        _ => {
-            unimplemented!("Not implemented\n{}", node);
+    if let AstNodeValue::Identifier(v) = &node.value {
+        let mut n = eval_identifier(node, v, env)?;
+        return eval_tree(&n, env);
+    } else {
+        match &node.value {
+            AstNodeValue::Operator(op) => eval_operator(node, op, env),
+            AstNodeValue::Literal(v) => Ok(v.clone()),
+
+            _ => {
+                unimplemented!("Not implemented\n{}", node);
+            }
         }
     }
 }
@@ -208,11 +214,13 @@ pub fn eval_with_env(input: &str, env: &mut Environment) -> Result<Value, EvalEr
         Ok(v) => v,
         Err(e) => return Err(EvalError::Runtime(e)),
     };
+    println!("\nParse result:\n{}", root);
     Ok(result)
 }
 
 pub fn eval(input: &str) -> Result<Value, EvalError> {
     let mut env = Environment::new();
+    env.set_var(&"pi".to_string(), Value::Float(3.14));
     eval_with_env(input, &mut env)
 }
 
