@@ -13,21 +13,21 @@ impl NumBase {
         match self {
             NumBase::Dec => digit.is_numeric(),
             NumBase::Bin => digit == '0' || digit == '1',
-            NumBase::Oct => digit >= '0' && digit <= '7',
+            NumBase::Oct => ('0'..'7').contains(&digit),
             NumBase::Hex => digit.is_ascii_hexdigit(),
         }
     }
 
-    pub fn parse_int(self, num_str: &String) -> Result<i64, std::num::ParseIntError> {
+    pub fn parse_int(self, num_str: &str) -> Result<i64, std::num::ParseIntError> {
         match self {
             NumBase::Dec => num_str.parse(),
-            NumBase::Bin => i64::from_str_radix(&num_str.trim_start_matches("0b"), 2),
-            NumBase::Oct => i64::from_str_radix(&num_str.trim_start_matches("0o"), 8),
-            NumBase::Hex => i64::from_str_radix(&num_str.trim_start_matches("0x"), 16),
+            NumBase::Bin => i64::from_str_radix(num_str.trim_start_matches("0b"), 2),
+            NumBase::Oct => i64::from_str_radix(num_str.trim_start_matches("0o"), 8),
+            NumBase::Hex => i64::from_str_radix(num_str.trim_start_matches("0x"), 16),
         }
     }
 
-    pub fn parse_float(self, num_str: &String) -> Result<f64, std::num::ParseFloatError> {
+    pub fn parse_float(self, num_str: &str) -> Result<f64, std::num::ParseFloatError> {
         match self {
             NumBase::Dec => num_str.parse(),
             _ => unimplemented!(),
